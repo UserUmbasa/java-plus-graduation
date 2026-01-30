@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: stats-server
+  sql:
+    init:
+      mode: always
+  datasource:
+    driverClassName: "org.postgresql.Driver"
+    url: "jdbc:postgresql://localhost:6432/stats"
+    username: "test"
+    password: "test"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop #none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: stats
+        format_sql: true
+
+    show-sql: true  # Добавляем здесь
+    logging: # Добавляем секцию логирования
+      level:
+        org:
+          hibernate:
+            SQL: DEBUG
+            type:
+              descriptor:
+                sql:
+                  BasicBinder: TRACE
+
+  # Настройки Eureka клиента
+  eureka:
+    client:
+      serviceUrl: # URL для связи с Eureka сервером
+        defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/
+        # Используются переменные для гибкости настройки хоста и порта
+        # По умолчанию используется localhost:8761
+
+server:
+  port: 9090

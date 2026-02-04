@@ -40,9 +40,9 @@ eureka:
 server:
     port: 8080
 
-#discovery:
-#  services:
-#    stats-server-id: stats-server
+discovery:
+  services:
+    stats-server-id: stats-server
 
 #stats:
 #    server:

@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.controller.HitController;
 import ru.practicum.controller.StatsApi;
 import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.category.model.Category;

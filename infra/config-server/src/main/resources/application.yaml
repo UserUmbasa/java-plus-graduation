@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: config-server
+
+  profiles:
+    # {profile} — Spring-профиль, указывает, что конфиги расположены локально (не на гите например)
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations:
+            - # Префикс file указывают, если используется абсолютный путь к файлу. Если файл расположен в ресурсах проекта, указывают префикс classpath.
+            - #{application} — имя приложения-клиента, которое будет использовать сервер конфигураций.
+            - classpath:config/core/{application}
+            - classpath:config/stats/{application}
+            - classpath:config/infra/{application}
+    discovery: # Добавляем секцию discovery
+      enabled: true  # Включаем обнаружение сервисов
+      #service-id: config-server  # Указываем ID сервиса
+
+server:
+  port: 8888
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/

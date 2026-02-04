@@ -6,21 +6,18 @@
         <groupId>ru.practicum</groupId>
         <artifactId>stats</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-<!--        <relativePath>../pom.xml</relativePath>-->
+        <relativePath>../pom.xml</relativePath>
     </parent>
-
+    <groupId>ru.practicum</groupId>
     <artifactId>stats-dto</artifactId>
-
-<!--    <groupId>ru.practicum</groupId>-->
-<!--    <version>0.0.1-SNAPSHOT</version>-->
-<!--    <name>stats-dto</name>-->
-<!--    <description>stats-dto</description>-->
-<!--    <packaging>jar</packaging> &lt;!&ndash; ЯВНО УКАЗАТЬ JAR &ndash;&gt;-->
+    <version>0.0.1-SNAPSHOT</version>
+    <name>stats-dto</name>
+    <description>stats-dto</description>
+    <packaging>jar</packaging> <!-- ЯВНО УКАЗАТЬ JAR -->
 
     <properties>
         <java.version>21</java.version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

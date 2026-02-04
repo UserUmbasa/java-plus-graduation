@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.StatsApi;
+import ru.practicum.client.StatsClient;
 import ru.practicum.dto.EndpointHitDTO;
 import ru.practicum.event.dto.EventDtoOut;
 import ru.practicum.event.dto.EventShortDtoOut;
@@ -39,7 +39,7 @@ import static ru.practicum.constants.Constants.DATE_TIME_FORMAT;
 public class PublicEventController {
 
     private final EventService eventService;
-    private final StatsApi statsClient; // в настройках переопределение
+    private final StatsClient statsClient; // в настройках переопределение
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @GetMapping
@@ -116,8 +116,7 @@ public class PublicEventController {
                 .timestamp(timestamp)
                 .build();
 
-        statsClient.createHit(endpointHitDto);
-
+        statsClient.saveHit(endpointHitDto);
         return dtoOut;
     }
 
@@ -126,15 +125,12 @@ public class PublicEventController {
             return;
         }
         try {
-            //statsClient.saveHits(hits);
-            for (EndpointHitDTO hit : hits) {
-                statsClient.createHit(hit);
-            }
+            statsClient.saveHits(hits);
         } catch (Exception e) {
             log.warn("Batch save failed, falling back to single saves: {}", e.getMessage());
             for (EndpointHitDTO hit : hits) {
                 try {
-                    statsClient.createHit(hit);
+                    statsClient.saveHit(hit);
                 } catch (Exception ex) {
                     log.error("Failed to save hit: {}", ex.getMessage());
                 }

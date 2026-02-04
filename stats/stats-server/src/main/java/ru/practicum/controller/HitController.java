@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.StatsApi;
 import ru.practicum.dto.EndpointHitDTO;
 import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.service.HitService;
@@ -21,18 +20,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 //@RequestMapping("/stats-server")
-public class HitController implements StatsApi {
+public class HitController {
 
     private final HitService hitService;
 
-    @Override
     @ResponseStatus(HttpStatus.CREATED)
     public void createHit(@RequestBody EndpointHitDTO endpointHitDTO) {
         log.info("Received hit: {}", endpointHitDTO);
         hitService.createHit(endpointHitDTO);
     }
 
-    @Override
     public List<ViewStatsDTO> getStats(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,

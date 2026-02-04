@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.StatsApi;
+import ru.practicum.client.StatsClient;
 import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
@@ -59,7 +59,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository requestRepository;
-    private final StatsApi statsClient; // в настройках переопределение
+    private final StatsClient statsClient; // в настройках переопределение
 
     @Override
     @Transactional

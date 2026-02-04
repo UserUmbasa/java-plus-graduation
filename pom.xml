@@ -23,6 +23,8 @@
 	</properties>
 
 	<modules>
+		<module>infra</module>
+		<module>core</module>
 		<module>stats</module>
 		<module>main-service</module>
 	</modules>

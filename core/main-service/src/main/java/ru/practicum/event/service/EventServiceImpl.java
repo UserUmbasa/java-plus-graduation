@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.controller.StatsApi;
 import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
@@ -30,7 +31,6 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.participation.repository.ParticipationRequestRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
-import ru.practicum.statsclient.client.StatsClient;
 
 import java.time.LocalDateTime;
 
@@ -59,7 +59,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository requestRepository;
-    private final StatsClient statsClient;
+    private final StatsApi statsClient; // в настройках переопределение
 
     @Override
     @Transactional

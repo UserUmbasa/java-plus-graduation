@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.controller.StatsApi;
 import ru.practicum.dto.EndpointHitDTO;
 import ru.practicum.event.dto.EventDtoOut;
 import ru.practicum.event.dto.EventShortDtoOut;
@@ -20,7 +22,6 @@ import ru.practicum.event.model.EventFilter;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 import ru.practicum.exception.InvalidRequestException;
-import ru.practicum.statsclient.client.StatsClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,7 @@ import static ru.practicum.constants.Constants.DATE_TIME_FORMAT;
 public class PublicEventController {
 
     private final EventService eventService;
-    private final StatsClient statsClient;
+    private final StatsApi statsClient; // в настройках переопределение
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @GetMapping
@@ -116,7 +117,7 @@ public class PublicEventController {
                 .timestamp(timestamp)
                 .build();
 
-        statsClient.saveHit(endpointHitDto);
+        statsClient.createHit(endpointHitDto);
 
         return dtoOut;
     }
@@ -126,12 +127,15 @@ public class PublicEventController {
             return;
         }
         try {
-            statsClient.saveHits(hits);
+            //statsClient.saveHits(hits);
+            for (EndpointHitDTO hit : hits) {
+                statsClient.createHit(hit);
+            }
         } catch (Exception e) {
             log.warn("Batch save failed, falling back to single saves: {}", e.getMessage());
             for (EndpointHitDTO hit : hits) {
                 try {
-                    statsClient.saveHit(hit);
+                    statsClient.createHit(hit);
                 } catch (Exception ex) {
                     log.error("Failed to save hit: {}", ex.getMessage());
                 }

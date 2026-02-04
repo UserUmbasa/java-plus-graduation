@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Primary;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHitDTO;
@@ -11,6 +12,7 @@ import java.util.List;
 
 //@FeignClient(name = "stats-server", path = "/stats-server")
 @FeignClient(name = "stats-server", url = "localhost:9090")
+@Primary
 public interface StatsApi {
 
     @PostMapping("/hit")

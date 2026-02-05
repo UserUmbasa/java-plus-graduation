@@ -13,12 +13,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
-public class StatsClient {
+
+public abstract class StatsClient {
     private final RestClient restClient;
     private final String serverUrl;
 
-    public StatsClient(@Value("${stats.server.url}")String serverUrl) {
+    public StatsClient(String serverUrl) {
+        System.out.println("serverUrl: " + serverUrl);
         this.serverUrl = serverUrl;
         this.restClient = RestClient.builder()
                 .baseUrl(serverUrl)

@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHitDTO;
 import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.service.HitService;
@@ -24,12 +21,14 @@ public class HitController {
 
     private final HitService hitService;
 
+    @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public void createHit(@RequestBody EndpointHitDTO endpointHitDTO) {
         log.info("Received hit: {}", endpointHitDTO);
         hitService.createHit(endpointHitDTO);
     }
 
+    @GetMapping("/stats")
     public List<ViewStatsDTO> getStats(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,

@@ -1,11 +1,10 @@
 {
   "info": {
-    "_postman_id": "89b9b9b3-d58d-4378-9fe8-1f5a76ed5551",
-    "name": "Explore With Me - Full Testing",
+    "_postman_id": "ece58769-de4c-49eb-8168-59a816e6a2a4",
+    "name": "Explore With Me - Gateway",
     "description": "Полные тесты: пользователи, категории, события, комментарии",
-    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-    "_exporter_id": "44814245",
-    "_collection_link": "https://mytya-8200712.postman.co/workspace/Mytya's-Workspace~efe44e1e-4b9c-4a92-8b3e-b7524147837d/collection/44814245-89b9b9b3-d58d-4378-9fe8-1f5a76ed5551?action=share&source=collection_link&creator=44814245"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39855247"
   },
   "item": [
     {
@@ -27,7 +26,9 @@
                   "    console.log(\"User1 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -43,7 +44,17 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Иван Петров\",\n  \"email\": \"ivan@mail.ru\"\n}"
             },
-            "url": "{{baseUrl}}/admin/users"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "users"
+              ]
+            }
           },
           "response": []
         },
@@ -63,7 +74,9 @@
                   "    console.log(\"User2 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -79,7 +92,17 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Мария Сидорова\",\n  \"email\": \"maria@mail.ru\"\n}"
             },
-            "url": "{{baseUrl}}/admin/users"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "users"
+              ]
+            }
           },
           "response": []
         },
@@ -99,7 +122,9 @@
                   "    console.log(\"User3 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -115,7 +140,17 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Алексей Козлов\",\n  \"email\": \"alexey@mail.ru\"\n}"
             },
-            "url": "{{baseUrl}}/admin/users"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "users"
+              ]
+            }
           },
           "response": []
         }
@@ -140,7 +175,9 @@
                   "    console.log(\"Category1 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -156,7 +193,17 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Концерты\"\n}"
             },
-            "url": "{{baseUrl}}/admin/categories"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "categories"
+              ]
+            }
           },
           "response": []
         },
@@ -176,7 +223,9 @@
                   "    console.log(\"Category2 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -192,7 +241,17 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Выставки\"\n}"
             },
-            "url": "{{baseUrl}}/admin/categories"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "categories"
+              ]
+            }
           },
           "response": []
         }
@@ -217,7 +276,9 @@
                   "    console.log(\"Event1 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -231,9 +292,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Концерт рок-группы\",\n  \"annotation\": \"Грандиозный концерт известной рок-группы\",\n  \"description\": \"Полное описание концерта с участием специальных гостей\",\n  \"category\": {{category1Id}},\n  \"eventDate\": \"2025-12-25 20:00:00\",\n  \"location\": {\n    \"lat\": 55.7558,\n    \"lon\": 37.6173\n  },\n  \"paid\": true,\n  \"participantLimit\": 1000\n}"
+              "raw": "{\n  \"title\": \"Концерт рок-группы\",\n  \"annotation\": \"Грандиозный концерт известной рок-группы\",\n  \"description\": \"Полное описание концерта с участием специальных гостей\",\n  \"category\": {{category1Id}},\n  \"eventDate\": \"2026-12-25 20:00:00\",\n  \"location\": {\n    \"lat\": 55.7558,\n    \"lon\": 37.6173\n  },\n  \"paid\": true,\n  \"participantLimit\": 1000\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/events"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "events"
+              ]
+            }
           },
           "response": []
         },
@@ -253,7 +325,9 @@
                   "    console.log(\"Event2 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -267,9 +341,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Выставка современного искусства\",\n  \"annotation\": \"Уникальная выставка современных художников\",\n  \"description\": \"Более 100 работ известных художников\",\n  \"category\": {{category2Id}},\n  \"eventDate\": \"2025-11-15 10:00:00\",\n  \"location\": {\n    \"lat\": 55.7517,\n    \"lon\": 37.6178\n  },\n  \"paid\": false,\n  \"participantLimit\": 500\n}"
+              "raw": "{\n  \"title\": \"Выставка современного искусства\",\n  \"annotation\": \"Уникальная выставка современных художников\",\n  \"description\": \"Более 100 работ известных художников\",\n  \"category\": {{category2Id}},\n  \"eventDate\": \"2026-11-15 10:00:00\",\n  \"location\": {\n    \"lat\": 55.7517,\n    \"lon\": 37.6178\n  },\n  \"paid\": false,\n  \"participantLimit\": 500\n}"
             },
-            "url": "{{baseUrl}}/users/{{user2Id}}/events"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user2Id}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user2Id}}",
+                "events"
+              ]
+            }
           },
           "response": []
         }
@@ -291,7 +376,9 @@
                   "    pm.expect(jsonData.state).to.equal(\"PUBLISHED\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -307,7 +394,18 @@
               "mode": "raw",
               "raw": "{\n  \"stateAction\": \"PUBLISH_EVENT\"\n}"
             },
-            "url": "{{baseUrl}}/admin/events/{{event1Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/events/{{event1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "events",
+                "{{event1Id}}"
+              ]
+            }
           },
           "response": []
         },
@@ -324,7 +422,9 @@
                   "    pm.expect(jsonData.state).to.equal(\"PUBLISHED\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -340,7 +440,18 @@
               "mode": "raw",
               "raw": "{\n  \"stateAction\": \"PUBLISH_EVENT\"\n}"
             },
-            "url": "{{baseUrl}}/admin/events/{{event2Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/events/{{event2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "events",
+                "{{event2Id}}"
+              ]
+            }
           },
           "response": []
         }
@@ -365,7 +476,9 @@
                   "    console.log(\"Comment1 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -381,7 +494,20 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Отличная выставка! Обязательно схожу.\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/events/{{event2Id}}/comments"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/events/{{event2Id}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "events",
+                "{{event2Id}}",
+                "comments"
+              ]
+            }
           },
           "response": []
         },
@@ -398,7 +524,9 @@
                   "    pm.expect(comments.length).to.equal(1);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -406,11 +534,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/{{event2Id}}/comments?from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/events/{{event2Id}}/comments?from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "events",
                 "{{event2Id}}",
                 "comments"
@@ -445,7 +574,9 @@
                   "    console.log(\"Comment2 ID: \" + jsonData.id);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -461,7 +592,20 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Жду не дождусь концерта! Билеты уже куплены!\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user2Id}}/events/{{event1Id}}/comments"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user2Id}}/events/{{event1Id}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user2Id}}",
+                "events",
+                "{{event1Id}}",
+                "comments"
+              ]
+            }
           },
           "response": []
         },
@@ -476,7 +620,9 @@
                   "    pm.response.to.have.status(200);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -492,7 +638,19 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Отличная выставка! Уточните время работы в выходные.\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/comments/{{comment1Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/comments/{{comment1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "comments",
+                "{{comment1Id}}"
+              ]
+            }
           },
           "response": []
         },
@@ -507,14 +665,27 @@
                   "    pm.response.to.have.status(204);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/admin/comments/{{comment1Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/admin/comments/{{comment1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "admin",
+                "comments",
+                "{{comment1Id}}"
+              ]
+            }
           },
           "response": []
         },
@@ -540,7 +711,9 @@
                   "    pm.expect(deletedComment.status).to.equal(\"DELETED\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -548,11 +721,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/comments?eventId={{event2Id}}&from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/admin/comments?eventId={{event2Id}}&from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "admin",
                 "comments"
               ],
@@ -594,7 +768,9 @@
                   "    pm.expect(deletedComment).to.not.exist;",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -602,11 +778,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/{{event2Id}}/comments?from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/events/{{event2Id}}/comments?from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "events",
                 "{{event2Id}}",
                 "comments"
@@ -636,7 +813,9 @@
                   "    pm.response.to.have.status(201);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -652,7 +831,20 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Интересная выставка, думаю сходить в выходные\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user3Id}}/events/{{event2Id}}/comments"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user3Id}}/events/{{event2Id}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user3Id}}",
+                "events",
+                "{{event2Id}}",
+                "comments"
+              ]
+            }
           },
           "response": []
         },
@@ -677,7 +869,9 @@
                   "    pm.expect(hasDeletedComments).to.be.false;",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -685,11 +879,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/{{event2Id}}/comments?from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/events/{{event2Id}}/comments?from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "events",
                 "{{event2Id}}",
                 "comments"
@@ -734,7 +929,9 @@
                   "    }",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -742,11 +939,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/{{event2Id}}/comments?from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/events/{{event2Id}}/comments?from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "events",
                 "{{event2Id}}",
                 "comments"
@@ -785,7 +983,9 @@
                   "    pm.expect(jsonData.message).to.include(\"Редактировать можно только свои комментарии\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -801,7 +1001,19 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Попытка редактирования чужого комментария\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user2Id}}/comments/{{comment1Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user2Id}}/comments/{{comment1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user2Id}}",
+                "comments",
+                "{{comment1Id}}"
+              ]
+            }
           },
           "response": []
         },
@@ -816,14 +1028,28 @@
                   "    pm.response.to.have.status(403);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/users/{{user1Id}}/comments/{{comment2Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/comments/{{comment2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "comments",
+                "{{comment2Id}}"
+              ]
+            }
           },
           "response": []
         }
@@ -843,7 +1069,9 @@
                   "    pm.response.to.have.status(400);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -859,7 +1087,20 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/events/{{event1Id}}/comments"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/events/{{event1Id}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "events",
+                "{{event1Id}}",
+                "comments"
+              ]
+            }
           },
           "response": []
         },
@@ -874,7 +1115,9 @@
                   "const longText = 'A'.repeat(2005);",
                   "pm.request.body.raw = JSON.stringify({ text: longText });"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
@@ -885,7 +1128,9 @@
                   "    pm.response.to.have.status(400);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -901,7 +1146,20 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"temp\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/events/{{event1Id}}/comments"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/events/{{event1Id}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "events",
+                "{{event1Id}}",
+                "comments"
+              ]
+            }
           },
           "response": []
         }
@@ -921,7 +1179,9 @@
                   "    pm.response.to.have.status(404);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -937,7 +1197,20 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Комментарий к несуществующему событию\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/events/99999/comments"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/events/99999/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "events",
+                "99999",
+                "comments"
+              ]
+            }
           },
           "response": []
         },
@@ -952,7 +1225,9 @@
                   "    pm.response.to.have.status(409);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -968,7 +1243,19 @@
               "mode": "raw",
               "raw": "{\n  \"text\": \"Попытка редактирования удаленного комментария\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{user1Id}}/comments/{{comment1Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/comments/{{comment1Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "users",
+                "{{user1Id}}",
+                "comments",
+                "{{comment1Id}}"
+              ]
+            }
           },
           "response": []
         }
@@ -995,14 +1282,28 @@
                   "    pm.expect(comment).to.have.property('createdAt');",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/events/{{event1Id}}/comments/{{comment2Id}}"
+            "url": {
+              "raw": "{{baseUrl}}/{{gateway}}/events/{{event1Id}}/comments/{{comment2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{gateway}}",
+                "events",
+                "{{event1Id}}",
+                "comments",
+                "{{comment2Id}}"
+              ]
+            }
           },
           "response": []
         },
@@ -1023,7 +1324,9 @@
                   "    });",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1031,11 +1334,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/users/{{user1Id}}/comments?from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/users/{{user1Id}}/comments?from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "users",
                 "{{user1Id}}",
                 "comments"
@@ -1071,7 +1375,9 @@
                   "    });",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1079,11 +1385,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/admin/comments?users={{user1Id}}&from=0&size=10",
+              "raw": "{{baseUrl}}/{{gateway}}/admin/comments?users={{user1Id}}&from=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "{{gateway}}",
                 "admin",
                 "comments"
               ],
@@ -1111,102 +1418,135 @@
       "name": "✅ 6. Финальная проверка",
       "item": [
         {
-          "name": "6.3 Проверка комментариев Event2",
+          "name": "Чек сервиса статистики",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Статус 200: Комментарии проверены\", function() {",
-                  "    pm.response.to.have.status(200);",
-                  "    var comments = pm.response.json();",
-                  "    console.log(\"Количество комментариев: \" + comments.length);",
-                  "});"
+                  ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/events/{{event2Id}}/comments?from=0&size=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "events",
-                "{{event2Id}}",
-                "comments"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"app\": \"stat-collector-service\",\r\n    \"uri\": \"/api/v1/stats/views\",\r\n    \"ip\": \"192.168.1.100\",\r\n    \"timestamp\": \"2026-02-02T10:39:13.650Z\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
                 }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/stats-server/hit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "stats-server",
+                "hit"
               ]
-            }
+            },
+            "description": "Сохранение информации о том, что на uri конкретного сервиса был отправлен запрос пользователем. Название сервиса, uri и ip пользователя указаны в теле запроса."
           },
           "response": []
         }
       ]
     }
   ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
+      "value": "http://localhost:8080"
     },
     {
       "key": "user1Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "user2Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "user3Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "category1Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "category2Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "event1Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "event2Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "comment1Id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "comment2Id",
-      "value": "",
-      "type": "string"
+      "value": ""
+    },
+    {
+      "key": "gateway",
+      "value": ""
     }
   ]
 }

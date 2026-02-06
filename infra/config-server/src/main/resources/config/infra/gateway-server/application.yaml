@@ -1,5 +1,5 @@
 server:
-  port: 8181
+  port: 8080
 
 spring:
   application:
@@ -17,16 +17,20 @@ spring:
           enabled: true
       routes:
         # ---- статистика ----
-        - id: stats_server
+        - id: stats_server_route
           uri: lb://stats-server
           predicates:
             - Path=/stats-server/**
+          filters:
+            - StripPrefix=1
 
         # ---- основа ----
-        - id: main_service
+        - id: main_service_route
           uri: lb://main-service
           predicates:
             - Path=/main-service/**
+          filters:
+            - StripPrefix=1
 
 # ---- Настройки логирования ----
 logging:

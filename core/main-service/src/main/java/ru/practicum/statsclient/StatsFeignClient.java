@@ -12,10 +12,8 @@ import ru.practicum.dto.ViewStatsDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// name: имя сервиса, как он зарегистрирован в Eureka (если используется)
-// url: базовый URL сервиса, если Eureka не используется или для теста.
-//      Обычно URL задается в application.properties: stats-service.url=http://localhost:9090
-@FeignClient(name = "stats-server", url = "${stats.service.url:http://localhost:9090}")
+//@FeignClient(name = "stats-server", url = "${stats.service.url:http://localhost:9090}")
+@FeignClient(name = "stats-server")
 public interface StatsFeignClient {
 
     @PostMapping("/hit")

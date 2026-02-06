@@ -1,0 +1,50 @@
+server:
+  port: 8181
+
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    # Настройки балансировщика
+    loadbalancer:
+      ribbon:
+        enabled: false # Отключаем старый Ribbon в пользу нового LoadBalancer
+      cache:
+        enabled: false # Отключаем кэш для теста, чтобы видеть переключение между инстансами сразу
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        # ---- статистика ----
+        - id: stats_server_route
+          uri: lb://stats-server
+          predicates:
+            - Path=/stats-server/**
+          filters:
+            - StripPrefix=1
+
+        # ---- основа ----
+        - id: main_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/main-service/**
+          filters:
+            - StripPrefix=1
+
+# ---- Настройки логирования ----
+logging:
+  level:
+    root: INFO
+
+      # Логи входящих HTTP-запросов в Gateway (от клиента к Gateway).
+    reactor.netty.http.server: DEBUG
+
+      # Логи исходящих HTTP-запросов из Gateway (от Gateway к микросервису).
+    reactor.netty.http.client: DEBUG
+
+#   --------------------------------------------------памятка----------------------------
+#  1.  prefer-ip-address: true — Всегда используйте это в локальной разработке (особенно на Windows), чтобы сервисы находили друг друга по IP, а не по капризным именам хостов типа Skynet.mshome.net.
+#  2.  instance-id — Чтобы запускать несколько копий одного сервиса на одной машине, ID должен быть уникальным (через ${random.value} или ${server.port}).
+#  3.  lb://service-name — В шлюзе это включает балансировку. Чтобы она работала «честно» и без ошибок WARN, важно отключать старый ribbon и использовать spring-cloud-starter-loadbalancer.
+#  4.  Path=/* — В предикатах шлюза всегда ставьте двойную звездочку, если хотите, чтобы маршрут ловил все вложенные эндпоинты (например, /address, /check, /add).

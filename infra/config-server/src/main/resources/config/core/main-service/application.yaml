@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: main-service
+  sql:
+    init:
+      mode: always
+  datasource:
+    driverClassName: "org.postgresql.Driver"
+    url: "jdbc:postgresql://localhost:6433/main-service"
+    username: "test"
+    password: "test"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop #none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: main
+        format_sql: true
+
+    show-sql: true  # Добавляем здесь
+    logging: # Добавляем секцию логирования
+      level:
+        org:
+          hibernate:
+            SQL: DEBUG
+            type:
+              descriptor:
+                sql:
+                  BasicBinder: TRACE
+
+  # Настройки Eureka клиента
+eureka:
+  instance:
+    # Использовать IP вместо имени хоста (решает проблему с DNS)
+    prefer-ip-address: true
+    # Явно задаем формат ID, чтобы там был IP, а не имя хоста
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
+
+server:
+    port: 8080 # 0
+
+#discovery:
+#  services:
+#    stats-server-id: stats-server
+
+stats:
+    server:
+#      url: http://stats-server:9090
+      url: http://localhost:9090

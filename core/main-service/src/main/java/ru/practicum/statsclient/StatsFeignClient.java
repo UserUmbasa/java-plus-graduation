@@ -12,8 +12,8 @@ import ru.practicum.dto.ViewStatsDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 
-//@FeignClient(name = "stats-server", url = "${stats.service.url:http://localhost:9090}")
-@FeignClient(name = "stats-server")
+@FeignClient(name = "stats-server", url = "${stats.service.url:http://localhost:9090}")
+//@FeignClient(name = "stats-server")
 public interface StatsFeignClient {
 
     @PostMapping("/hit")

@@ -38,7 +38,7 @@ eureka:
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
 server:
-    port: 0 #8080
+    port: 8080 # 0
 
 #discovery:
 #  services:

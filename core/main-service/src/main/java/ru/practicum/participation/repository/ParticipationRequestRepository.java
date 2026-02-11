@@ -9,9 +9,9 @@ import ru.practicum.participation.model.RequestStatus;
 import java.util.List;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
-    boolean existsByRequesterIdAndEventId(Long userId, Long eventId);
+    boolean existsByRequesterAndEventId(Long userId, Long eventId);
 
-    List<ParticipationRequest> findAllByRequesterId(Long userId);
+    List<ParticipationRequest> findAllByRequester(Long userId);
 
     List<ParticipationRequest> findAllByEventId(Long eventId);
 

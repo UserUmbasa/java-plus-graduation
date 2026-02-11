@@ -8,8 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>main-service</artifactId>
-
+    <artifactId>user-service</artifactId>
 
     <properties>
         <java.version>21</java.version>
@@ -17,12 +16,12 @@
 
     <dependencies>
         <!-- API для взаимодействия -->
-        <dependency>
-            <groupId>ru.practicum</groupId>
-            <artifactId>stats-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>ru.practicum</groupId>-->
+<!--            <artifactId>stats-client</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>ru.practicum</groupId>-->
 <!--            <artifactId>interaction-api</artifactId>-->
@@ -136,5 +135,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

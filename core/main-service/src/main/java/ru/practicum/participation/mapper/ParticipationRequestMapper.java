@@ -11,7 +11,7 @@ public class ParticipationRequestMapper {
                 .id(r.getId())
                 .created(r.getCreated())
                 .event(r.getEvent().getId())
-                .requester(r.getRequester().getId())
+                .requester(r.getRequester())
                 .status(r.getStatus().name())
                 .build();
     }

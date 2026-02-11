@@ -1,13 +1,13 @@
-package ru.practicum.interactionApi;
+package ru.practicum.userService;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class InteractionApiApplication {
+public class UserService {
 
     public static void main(String[] args) {
-        SpringApplication.run(InteractionApiApplication.class, args);
+        SpringApplication.run(UserService.class, args);
     }
 
 }

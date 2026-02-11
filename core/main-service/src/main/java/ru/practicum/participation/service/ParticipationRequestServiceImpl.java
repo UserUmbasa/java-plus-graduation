@@ -11,6 +11,7 @@ import ru.practicum.exception.ConditionNotMetException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NoAccessException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.feignClients.UserOperations;
 import ru.practicum.participation.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.participation.dto.EventRequestStatusUpdateResult;
 import ru.practicum.participation.dto.ParticipationRequestDto;
@@ -18,8 +19,6 @@ import ru.practicum.participation.mapper.ParticipationRequestMapper;
 import ru.practicum.participation.model.ParticipationRequest;
 import ru.practicum.participation.model.RequestStatus;
 import ru.practicum.participation.repository.ParticipationRequestRepository;
-import ru.practicum.user.model.User;
-import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -35,7 +34,7 @@ import static ru.practicum.participation.model.RequestStatus.CONFIRMED;
 @RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
-    private final UserRepository userRepo;
+    private final UserOperations userOperations;
     private final EventRepository eventRepo;
     private final ParticipationRequestRepository requestRepo;
 
@@ -43,9 +42,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         log.info("Пользователь {} пытается создать запрос участия для события {}", userId, eventId);
 
-        User user = getUserById(userId);
+        //Long userIdW = getUserById(userId);
         Event event = getEventById(eventId);
 
+        checkUserNotExists(userId);
         checkRequestNotExists(userId, eventId);
         checkNotEventInitiator(userId, event);
         checkEventIsPublished(event);
@@ -54,7 +54,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         RequestStatus status = determineRequestStatus(event);
 
         ParticipationRequest request = new ParticipationRequest();
-        request.setRequester(user);
+        request.setRequester(userId);
         request.setEvent(event);
         request.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS));
         request.setStatus(status);
@@ -64,10 +64,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
-        if (!userRepo.existsById(userId)) {
+        if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
-        return requestRepo.findAllByRequesterId(userId).stream()
+        return requestRepo.findAllByRequester(userId).stream()
                 .map(ParticipationRequestMapper::toDto)
                 .toList();
     }
@@ -87,9 +87,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<ParticipationRequestDto> getRequestsForEvent(Long eventId, Long initiatorId) {
         log.debug("getRequestsForEvent: {} of user: {}", eventId, initiatorId);
-        getUserById(initiatorId);
+        //getUserById(initiatorId);
+        checkUserNotExists(initiatorId);
         Event event = getEventById(eventId);
-        if (!event.getInitiator().getId().equals(initiatorId)) {
+        if (!event.getInitiator().equals(initiatorId)) {
             throw new NoAccessException("Только инициатор может просматривать запросы на проведение мероприятия");
         }
         List<ParticipationRequest> allByEventId = requestRepo.findAllByEventId(eventId);
@@ -104,31 +105,40 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         log.info("Пользователь {} отменяет заявку с ID {}", userId, requestId);
         ParticipationRequest request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("ParticipationRequest", requestId));
-        if (!request.getRequester().getId().equals(userId)) {
+        if (!request.getRequester().equals(userId)) {
             throw new ForbiddenException("Отменить его может только автор заявки.");
         }
         request.setStatus(CANCELED);
         return ParticipationRequestMapper.toDto(requestRepo.save(request));
     }
 
-    private User getUserById(Long userId) {
-        return userRepo.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User", userId));
-    }
+//    private Long getUserById(Long userId) {
+//        UserDtoOut result = userOperations.getUser(userId);
+//        if (result == null) {
+//            throw new NotFoundException("User", userId);
+//        }
+//        return result.getId();
+//    }
 
     private Event getEventById(Long eventId) {
         return eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
     }
 
+    private void checkUserNotExists(Long userId) {
+        if (!userOperations.getExistsById(userId)) {
+            throw new NotFoundException("User", userId);
+        }
+    }
+
     private void checkRequestNotExists(Long userId, Long eventId) {
-        if (requestRepo.existsByRequesterIdAndEventId(userId, eventId)) {
+        if (requestRepo.existsByRequesterAndEventId(userId, eventId)) {
             throw new ConditionNotMetException("Заявка на участие уже отправлена.");
         }
     }
 
     private void checkNotEventInitiator(Long userId, Event event) {
-        if (event.getInitiator().getId().equals(userId)) {
+        if (event.getInitiator().equals(userId)) {
             throw new ConditionNotMetException("Заявка на участие уже отправлена.");
         }
     }
@@ -155,7 +165,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private Event getEventWithCheck(Long userId, Long eventId) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiator().equals(userId)) {
             throw new ForbiddenException("Пользователь не является инициатором события");
         }
         if (!EventState.PUBLISHED.equals(event.getState())) {

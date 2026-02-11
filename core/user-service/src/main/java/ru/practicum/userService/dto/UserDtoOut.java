@@ -1,4 +1,4 @@
-package ru.practicum.interactionApi.dto.user;
+package ru.practicum.userService.dto;
 
 import lombok.*;
 

@@ -32,6 +32,14 @@ spring:
           filters:
             - StripPrefix=1
 
+        # ---- основа ----
+        - id: user_service_route
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1
+
 # ---- Настройки логирования ----
 logging:
   level:

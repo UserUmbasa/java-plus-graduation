@@ -1,16 +1,20 @@
 package ru.practicum.event.mapper;
 
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.event.dto.EventCreateDto;
 import ru.practicum.event.dto.EventDtoOut;
 import ru.practicum.event.dto.EventShortDtoOut;
 import ru.practicum.event.dto.LocationDto;
 import ru.practicum.event.model.Event;
-import ru.practicum.user.mapper.UserMapper;
+import ru.practicum.feignClients.UserOperations;
 
-@UtilityClass
+//@UtilityClass
+@Component
+@RequiredArgsConstructor
 public class EventMapper {
+    private final UserOperations userOperations;
     public static Event fromDto(EventCreateDto eventDto) {
         return Event.builder()
                 .annotation(eventDto.getAnnotation())
@@ -25,7 +29,7 @@ public class EventMapper {
                 .build();
     }
 
-    public static EventDtoOut toDto(Event event) {
+    public EventDtoOut toDto(Event event) {
         return EventDtoOut.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -34,7 +38,7 @@ public class EventMapper {
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
                 .description(event.getDescription())
-                .initiator(UserMapper.toDto(event.getInitiator()))
+                .initiator(userOperations.getUser(event.getInitiator()))
                 .createdOn(event.getCreatedAt())
                 .state(event.getState())
                 .confirmedRequests(event.getConfirmedRequests())
@@ -47,7 +51,7 @@ public class EventMapper {
                 .build();
     }
 
-    public static EventShortDtoOut toShortDto(Event event) {
+    public EventShortDtoOut toShortDto(Event event) {
         return EventShortDtoOut.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -55,7 +59,7 @@ public class EventMapper {
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
-                .initiator(UserMapper.toDto(event.getInitiator()))
+                .initiator(userOperations.getUser(event.getInitiator()))
                 .confirmedRequests(event.getConfirmedRequests())
                 .views(event.getViews())
                 .build();

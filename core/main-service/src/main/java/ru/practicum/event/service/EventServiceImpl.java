@@ -27,10 +27,9 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConditionNotMetException;
 import ru.practicum.exception.NoAccessException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.feignClients.UserOperations;
 import ru.practicum.participation.repository.ParticipationRequestRepository;
 import ru.practicum.statsclient.StatsFeignClient;
-import ru.practicum.user.model.User;
-import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 
@@ -56,7 +55,10 @@ public class EventServiceImpl implements EventService {
     private static final int MIN_TIME_TO_PUBLISHED_EVENT = 1;
 
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final EventMapper eventMapper;
+    //private final UserRepository userRepository;
+    private final UserOperations userOperations;
+
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository requestRepository;
     private final StatsFeignClient statsClient; // в настройках переопределение
@@ -66,19 +68,21 @@ public class EventServiceImpl implements EventService {
     public EventDtoOut add(Long userId, EventCreateDto eventDto) {
         validateEventDate(eventDto.getEventDate(), EventState.PENDING);
         Category category = getCategory(eventDto.getCategoryId());
-        User user = getUser(userId);
+        if (!userOperations.getExistsById(userId)) {
+            throw new NotFoundException("User", userId);
+        }
         Event event = EventMapper.fromDto(eventDto);
         event.setCategory(category);
-        event.setInitiator(user);
+        event.setInitiator(userId);
         event = eventRepository.save(event);
-        return EventMapper.toDto(event);
+        return eventMapper.toDto(event);
     }
 
     @Override
     @Transactional
     public EventDtoOut update(Long userId, Long eventId, EventUpdateDto eventDto) {
         Event event = getEvent(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiator().equals(userId)) {
             throw new NoAccessException("Редактировать событие может только инициатор");
         }
         if (event.getState() == EventState.PUBLISHED) {
@@ -111,7 +115,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         Event updated = eventRepository.save(event);
-        return EventMapper.toDto(updated);
+        return eventMapper.toDto(updated);
     }
 
     @Override
@@ -140,7 +144,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         Event saved = eventRepository.save(event);
-        return EventMapper.toDto(saved);
+        return eventMapper.toDto(saved);
     }
 
     @Override
@@ -148,7 +152,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findPublishedById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
         enrichWithStats(Collections.singletonList(event));
-        return EventMapper.toDto(event);
+        return eventMapper.toDto(event);
     }
 
     private void enrichWithStats(List<Event> events) {
@@ -226,22 +230,25 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDtoOut find(Long userId, Long eventId) {
-        if (!userRepository.existsById(userId)) {
+//        if (!userRepository.existsById(userId)) {
+//            throw new NotFoundException("User", userId);
+//        }
+        if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
         Event event = getEvent(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiator().equals(userId)) {
             throw new NoAccessException("Только инициатор может просматривать это событие");
         }
         enrichWithStats(Collections.singletonList(event));
-        return EventMapper.toDto(event);
+        return eventMapper.toDto(event);
     }
 
     @Override
     public Collection<EventShortDtoOut> findShortEventsBy(EventFilter filter) {
         Specification<Event> spec = buildSpecification(filter);
         return findBy(spec, filter.getPageable()).stream()
-                .map(EventMapper::toShortDto)
+                .map(eventMapper::toShortDto)
                 .toList();
     }
 
@@ -249,7 +256,7 @@ public class EventServiceImpl implements EventService {
     public Collection<EventDtoOut> findFullEventsBy(EventAdminFilter filter) {
         Specification<Event> spec = buildSpecification(filter);
         return findBy(spec, filter.getPageable()).stream()
-                .map(EventMapper::toDto)
+                .map(eventMapper::toDto)
                 .toList();
     }
 
@@ -293,7 +300,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventShortDtoOut> findByInitiator(Long userId, Integer offset, Integer limit) {
-        if (!userRepository.existsById(userId)) {
+//        if (!userRepository.existsById(userId)) {
+//            throw new NotFoundException("User", userId);
+//        }
+        if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
 
@@ -303,7 +313,7 @@ public class EventServiceImpl implements EventService {
         enrichWithStatsCollection(events);
 
         return events.stream()
-                .map(EventMapper::toShortDto)
+                .map(eventMapper::toShortDto)
                 .toList();
     }
 
@@ -361,11 +371,11 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Category", categoryId));
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User", userId));
-    }
+//    @SuppressWarnings("UnusedReturnValue")
+//    private User getUser(Long userId) {
+//        return userRepository.findById(userId)
+//                .orElseThrow(() -> new NotFoundException("User", userId));
+//    }
 
     @SuppressWarnings("UnusedReturnValue")
     private Event getEvent(Long eventId) {

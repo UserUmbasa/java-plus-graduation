@@ -25,6 +25,7 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class CompilationServiceImpl implements CompilationService {
 
+    private final CompilationMapper compilationMapper;
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
 
@@ -37,7 +38,7 @@ public class CompilationServiceImpl implements CompilationService {
                 : compilationRepository.findAll(pageable).getContent();
 
         return compilations.stream()
-                .map(CompilationMapper::toDto)
+                .map(compilationMapper::toDto)
                 .toList();
     }
 
@@ -45,7 +46,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto getCompilationById(Long compId) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Compilation", compId));
-        return CompilationMapper.toDto(compilation);
+        return compilationMapper.toDto(compilation);
     }
 
     @Transactional
@@ -59,11 +60,11 @@ public class CompilationServiceImpl implements CompilationService {
             events = new HashSet<>(eventRepository.findAllById(newCompilationDto.getEvents()));
         }
 
-        Compilation compilation = CompilationMapper.toEntity(newCompilationDto, events);
+        Compilation compilation = compilationMapper.toEntity(newCompilationDto, events);
 
         Compilation saved = compilationRepository.save(compilation);
 
-        return CompilationMapper.toDto(saved);
+        return compilationMapper.toDto(saved);
     }
 
     @Transactional
@@ -92,6 +93,6 @@ public class CompilationServiceImpl implements CompilationService {
             Set<Event> events = new HashSet<>(eventRepository.findAllById(dto.getEvents()));
             compilation.setEvents(events);
         }
-        return CompilationMapper.toDto(compilation);
+        return compilationMapper.toDto(compilation);
     }
 }

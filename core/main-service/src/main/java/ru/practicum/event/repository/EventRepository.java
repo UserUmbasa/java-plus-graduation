@@ -14,7 +14,7 @@ public interface EventRepository extends
         JpaRepository<Event, Long>,
         JpaSpecificationExecutor<Event> {
 
-    @Query("SELECT e FROM Event e WHERE e.initiator.id = :userId")
+    @Query("SELECT e FROM Event e WHERE e.initiator = :userId")
     Page<Event> findByInitiatorId(@Param("userId") Long userId, Pageable pageable);
 
     @Query(value = """

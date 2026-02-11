@@ -1,15 +1,16 @@
-package ru.practicum.user.service;
+package ru.practicum.userService.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.user.dto.NewUserRequest;
-import ru.practicum.user.dto.UserDtoOut;
-import ru.practicum.user.mapper.UserMapper;
-import ru.practicum.user.model.User;
-import ru.practicum.user.repository.UserRepository;
+import ru.practicum.userService.dto.NewUserRequest;
+import ru.practicum.userService.dto.UserDtoOut;
+import ru.practicum.userService.mapper.UserMapper;
+import ru.practicum.userService.model.User;
+import ru.practicum.userService.repository.UserRepository;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,8 +42,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDtoOut getUser(Long userId) {
+        User result = userRepository.findById(userId).orElse(null);
+        return UserMapper.toDto(result);
+    }
+
+    @Override
     @Transactional
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public boolean getExistsById(Long userId) {
+        return userRepository.existsById(userId);
     }
 }

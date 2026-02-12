@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    Page<Comment> findByEventIdAndStatusInOrderByCreatedAtDesc(Long eventId, List<CommentStatus> statuses, Pageable pageable);
+    Page<Comment> findByEventAndStatusInOrderByCreatedAtDesc(Long eventId, List<CommentStatus> statuses, Pageable pageable);
 
     Page<Comment> findByUserAndStatusNotOrderByCreatedAtDesc(Long userId, CommentStatus status, Pageable pageable);
 
     @Query("""
             SELECT c FROM Comment c WHERE
-                (:eventIds IS NULL OR c.event.id IN :eventIds) AND
+                (:eventIds IS NULL OR c.event IN :eventIds) AND
                 (:userIds IS NULL OR c.user IN :userIds)
             ORDER BY c.createdAt DESC
             """)

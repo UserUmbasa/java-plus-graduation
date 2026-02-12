@@ -20,7 +20,7 @@ spring:
         - id: main_service_route
           uri: lb://main-service
           predicates:
-            - Path=/**
+            - Path=/users/{userId}/events/{eventId}/requests/**, /users/{userId}/requests/**, /users/{userId}/requests/{requestId}/cancel/**, /events/requests/counts/**, /events/{eventId}/comments/**, /users/{userId}/**, /admin/comments/**
 #          filters:
 #            - StripPrefix=1
 
@@ -28,9 +28,14 @@ spring:
         - id: user_service_route
           uri: lb://user-service
           predicates:
-            - Path=/**
+            - Path=/admin/users/**
 #          filters:
 #            - StripPrefix=1
+
+        - id: event_service_route
+          uri: lb://event-service
+          predicates:
+            - Path=/**
 
 # ---- Настройки логирования ----
 logging:

@@ -45,4 +45,11 @@ public class ParticipationRequestController {
         ParticipationRequestDto canceledRequest = requestService.cancelRequest(userId, requestId);
         return ResponseEntity.ok(canceledRequest);
     }
+
+    @GetMapping("/events/requests/counts")
+    public ResponseEntity<List<Object[]>> getConfirmedRequestsCountByEvents(
+            @RequestParam List<Long> eventIds) {
+        List<Object[]> requestsCountsList = requestService.getConfirmedRequestsCountByEvents(eventIds);
+        return ResponseEntity.ok(requestsCountsList);
+    }
 }

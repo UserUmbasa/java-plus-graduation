@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.event.dto.EventShortDtoOut;
 import ru.practicum.user.dto.UserDtoOut;
 
 import java.time.LocalDateTime;

@@ -6,10 +6,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.participation.dto.event.EventDtoOut;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDtoOut;
 
 import java.util.List;
+import java.util.Optional;
 
 //@FeignClient(name = "user-service")
 @Validated
@@ -33,5 +35,6 @@ public interface UserOperations {
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long userId);
+
 }
 

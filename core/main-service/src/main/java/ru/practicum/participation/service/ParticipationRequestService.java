@@ -17,4 +17,6 @@ public interface ParticipationRequestService {
     ParticipationRequestDto cancelRequest(Long userId, Long requestId);
 
     EventRequestStatusUpdateResult updateRequestStatuses(Long userId, Long eventId, EventRequestStatusUpdateRequest request);
+
+    List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds);
 }

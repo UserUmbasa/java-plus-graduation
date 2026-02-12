@@ -12,13 +12,13 @@ import ru.practicum.comment.mapper.CommentMapper;
 import ru.practicum.comment.model.Comment;
 import ru.practicum.comment.model.CommentStatus;
 import ru.practicum.comment.repository.CommentRepository;
-import ru.practicum.event.model.Event;
-import ru.practicum.event.model.EventState;
-import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConditionNotMetException;
 import ru.practicum.exception.NoAccessException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.feignClients.EventOperations;
 import ru.practicum.feignClients.UserOperations;
+import ru.practicum.participation.dto.event.EventDtoOut;
+import ru.practicum.participation.dto.event.EventState;
 
 import java.util.List;
 
@@ -31,7 +31,8 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final CommentRepository commentRepository;
     private final UserOperations userOperations;
-    private final EventRepository eventRepository;
+    private final EventOperations eventOperations;
+    //private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -40,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
         if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
-        Event event = eventRepository.findById(eventId)
+        EventDtoOut event = eventOperations.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
         if (event.getState() != EventState.PUBLISHED) {
             throw new ConditionNotMetException("Нельзя оставлять комментарии к неопубликованному событию");
@@ -48,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = Comment.builder()
                 .text(commentCreateDto.getText().trim())
                 .user(userId)
-                .event(event)
+                .event(eventId)
                 .status(CommentStatus.PUBLISHED)
                 .build();
 
@@ -123,13 +124,13 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getEventComments(Long eventId, Pageable pageable) {
         log.info("Получение комментариев события {}", eventId);
 
-        if (!eventRepository.existsById(eventId)) {
+        if (!eventOperations.existsById(eventId)) {
             throw new NotFoundException("Event", eventId);
         }
 
         List<CommentStatus> activeStatuses = List.of(CommentStatus.PUBLISHED, CommentStatus.EDITED);
         return commentRepository
-                .findByEventIdAndStatusInOrderByCreatedAtDesc(eventId, activeStatuses, pageable)
+                .findByEventAndStatusInOrderByCreatedAtDesc(eventId, activeStatuses, pageable)
                 .getContent()
                 .stream()
                 .map(commentMapper::toDto)

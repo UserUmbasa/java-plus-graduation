@@ -4,17 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.event.model.Event;
-import ru.practicum.event.model.EventState;
-import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConditionNotMetException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NoAccessException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.feignClients.EventOperations;
 import ru.practicum.feignClients.UserOperations;
 import ru.practicum.participation.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.participation.dto.EventRequestStatusUpdateResult;
 import ru.practicum.participation.dto.ParticipationRequestDto;
+import ru.practicum.participation.dto.event.EventDtoOut;
+import ru.practicum.participation.dto.event.EventState;
 import ru.practicum.participation.mapper.ParticipationRequestMapper;
 import ru.practicum.participation.model.ParticipationRequest;
 import ru.practicum.participation.model.RequestStatus;
@@ -35,7 +35,8 @@ import static ru.practicum.participation.model.RequestStatus.CONFIRMED;
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
     private final UserOperations userOperations;
-    private final EventRepository eventRepo;
+    private final EventOperations eventOperations;
+    //private final EventRepository eventRepo;
     private final ParticipationRequestRepository requestRepo;
 
     @Transactional
@@ -43,7 +44,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         log.info("Пользователь {} пытается создать запрос участия для события {}", userId, eventId);
 
         //Long userIdW = getUserById(userId);
-        Event event = getEventById(eventId);
+        EventDtoOut event = getEventById(eventId);
 
         checkUserNotExists(userId);
         checkRequestNotExists(userId, eventId);
@@ -55,7 +56,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(userId);
-        request.setEvent(event);
+        request.setEvent(eventId);
         request.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS));
         request.setStatus(status);
         log.info("Создана заявка от пользователя {} на событие {} со статусом {}", userId, eventId, status);
@@ -75,7 +76,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Transactional
     public EventRequestStatusUpdateResult updateRequestStatuses(Long userId, Long eventId,
                                                                 EventRequestStatusUpdateRequest request) {
-        Event event = getEventWithCheck(userId, eventId);
+        EventDtoOut event = getEventWithCheck(userId, eventId);
         List<ParticipationRequest> requests = getPendingRequestsOrThrow(request.getRequestIds());
         return switch (request.getStatus()) {
             case "CONFIRMED" -> confirmRequests(event, requests);
@@ -85,15 +86,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
+    public List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds) {
+        return requestRepo.findConfirmedRequestCountsByEventIds(eventIds);
+    }
+
+    @Override
     public List<ParticipationRequestDto> getRequestsForEvent(Long eventId, Long initiatorId) {
         log.debug("getRequestsForEvent: {} of user: {}", eventId, initiatorId);
         //getUserById(initiatorId);
         checkUserNotExists(initiatorId);
-        Event event = getEventById(eventId);
-        if (!event.getInitiator().equals(initiatorId)) {
+        EventDtoOut event = getEventById(eventId);
+        if (!event.getInitiator().getId().equals(initiatorId)) {
             throw new NoAccessException("Только инициатор может просматривать запросы на проведение мероприятия");
         }
-        List<ParticipationRequest> allByEventId = requestRepo.findAllByEventId(eventId);
+        List<ParticipationRequest> allByEventId = requestRepo.findAllByEvent(eventId);
         return allByEventId.stream()
                 .map(ParticipationRequestMapper::toDto)
                 .toList();
@@ -120,8 +126,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 //        return result.getId();
 //    }
 
-    private Event getEventById(Long eventId) {
-        return eventRepo.findById(eventId)
+    private EventDtoOut getEventById(Long eventId) {
+        return eventOperations.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
     }
 
@@ -132,40 +138,40 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     private void checkRequestNotExists(Long userId, Long eventId) {
-        if (requestRepo.existsByRequesterAndEventId(userId, eventId)) {
+        if (requestRepo.existsByRequesterAndEvent(userId, eventId)) {
             throw new ConditionNotMetException("Заявка на участие уже отправлена.");
         }
     }
 
-    private void checkNotEventInitiator(Long userId, Event event) {
-        if (event.getInitiator().equals(userId)) {
+    private void checkNotEventInitiator(Long userId, EventDtoOut event) {
+        if (event.getInitiator().getId().equals(userId)) {
             throw new ConditionNotMetException("Заявка на участие уже отправлена.");
         }
     }
 
-    private void checkEventIsPublished(Event event) {
+    private void checkEventIsPublished(EventDtoOut event) {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConditionNotMetException("Невозможно принять участие в неопубликованном мероприятии.");
         }
     }
 
-    private void checkParticipantLimit(Event event, Long eventId) {
-        long confirmed = requestRepo.countByEventIdAndStatus(eventId, CONFIRMED);
+    private void checkParticipantLimit(EventDtoOut event, Long eventId) {
+        long confirmed = requestRepo.countByEventAndStatus(eventId, CONFIRMED);
         if (event.getParticipantLimit() > 0 && confirmed >= event.getParticipantLimit()) {
             throw new ConditionNotMetException("Лимит участников мероприятия достигнут.");
         }
     }
 
-    private RequestStatus determineRequestStatus(Event event) {
+    private RequestStatus determineRequestStatus(EventDtoOut event) {
         return (!Boolean.TRUE.equals(event.getRequestModeration()) || event.getParticipantLimit() == 0)
                 ? RequestStatus.CONFIRMED
                 : RequestStatus.PENDING;
     }
 
-    private Event getEventWithCheck(Long userId, Long eventId) {
-        Event event = eventRepo.findById(eventId)
+    private EventDtoOut getEventWithCheck(Long userId, Long eventId) {
+        EventDtoOut event = eventOperations.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
-        if (!event.getInitiator().equals(userId)) {
+        if (!event.getInitiator().getId().equals(userId)) {
             throw new ForbiddenException("Пользователь не является инициатором события");
         }
         if (!EventState.PUBLISHED.equals(event.getState())) {
@@ -184,10 +190,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         return requests;
     }
 
-    private EventRequestStatusUpdateResult confirmRequests(Event event, List<ParticipationRequest> requests) {
+    private EventRequestStatusUpdateResult confirmRequests(EventDtoOut event, List<ParticipationRequest> requests) {
         checkIfLimitAvailableOrThrow(event);
         int limit = event.getParticipantLimit();
-        long confirmedCount = requestRepo.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+        long confirmedCount = requestRepo.countByEventAndStatus(event.getId(), RequestStatus.CONFIRMED);
         int available = limit - (int) confirmedCount;
         List<ParticipationRequest> confirmed = new ArrayList<>();
         List<ParticipationRequest> rejected = new ArrayList<>();
@@ -208,15 +214,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         );
     }
 
-    private void checkIfLimitAvailableOrThrow(Event event) {
+    private void checkIfLimitAvailableOrThrow(EventDtoOut event) {
         int limit = event.getParticipantLimit();
-        long confirmedCount = requestRepo.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+        long confirmedCount = requestRepo.countByEventAndStatus(event.getId(), RequestStatus.CONFIRMED);
         if (limit != 0 && Boolean.TRUE.equals(event.getRequestModeration()) && confirmedCount >= limit) {
             throw new ConditionNotMetException("Лимит участников мероприятия достигнет");
         }
     }
 
-    private boolean shouldAutoConfirm(Event event) {
+    private boolean shouldAutoConfirm(EventDtoOut event) {
         return event.getParticipantLimit() == 0 || Boolean.FALSE.equals(event.getRequestModeration());
     }
 

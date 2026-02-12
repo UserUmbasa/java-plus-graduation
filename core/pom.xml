@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>event-service</module>
         <module>user-service</module>
         <module>main-service</module>
     </modules>

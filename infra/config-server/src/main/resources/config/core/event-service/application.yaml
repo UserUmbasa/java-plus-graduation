@@ -1,12 +1,12 @@
 spring:
   application:
-    name: main-service
+    name: event-service
   sql:
     init:
       mode: always
   datasource:
     driverClassName: "org.postgresql.Driver"
-    url: "jdbc:postgresql://localhost:6433/main-service"
+    url: "jdbc:postgresql://localhost:6435/event-service"
     username: "test"
     password: "test"
   jpa:
@@ -15,7 +15,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
-        default_schema: main
+        default_schema: event
         format_sql: true
 
     show-sql: true  # Добавляем здесь

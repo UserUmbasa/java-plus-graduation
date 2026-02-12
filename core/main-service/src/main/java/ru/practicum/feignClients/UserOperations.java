@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDtoOut;
@@ -11,6 +12,7 @@ import ru.practicum.user.dto.UserDtoOut;
 import java.util.List;
 
 //@FeignClient(name = "user-service")
+@Validated
 @FeignClient(name = "user-service", path = "/admin/users")
 public interface UserOperations {
     @PostMapping

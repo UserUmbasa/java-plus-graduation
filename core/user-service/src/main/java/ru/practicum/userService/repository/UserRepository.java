@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    boolean existsByEmail(String email);
+
     @Query("SELECT u FROM User u " +
             "WHERE (:ids IS NULL OR u.id IN :ids) " +
             "ORDER BY u.id")

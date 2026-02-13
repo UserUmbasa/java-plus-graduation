@@ -23,6 +23,7 @@ import ru.practicum.eventservice.event.service.EventService;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static ru.practicum.eventservice.constants.Constants.DATE_TIME_FORMAT;
 
@@ -35,6 +36,16 @@ import static ru.practicum.eventservice.constants.Constants.DATE_TIME_FORMAT;
 public class AdminEventController {
 
     private final EventService eventService;
+
+    @GetMapping("/{eventId}/exists")
+    boolean getExistsById(@PathVariable Long eventId) {
+        return eventService.getExistsById(eventId);
+    }
+
+    @GetMapping("/{eventId}")
+    Optional<EventDtoOut> findById(@PathVariable Long eventId) {
+        return eventService.findById(eventId);
+    }
 
     @GetMapping
     public Collection<EventDtoOut> getEvents(

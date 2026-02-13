@@ -26,14 +26,13 @@ import ru.practicum.comment.service.CommentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/{userId}")
 @RequiredArgsConstructor
 @Validated
 public class CommentPrivateController {
 
     private final CommentService commentService;
 
-    @PostMapping("/events/{eventId}/comments")
+    @PostMapping("/users/{userId}/events/{eventId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto createComment(@PathVariable @Min(1) Long userId,
                                     @PathVariable @Min(1) Long eventId,
@@ -41,21 +40,21 @@ public class CommentPrivateController {
         return commentService.createComment(userId, eventId, commentCreateDto);
     }
 
-    @PatchMapping("/comments/{commentId}")
+    @PatchMapping("/users/{userId}/comments/{commentId}")
     public CommentDto updateComment(@PathVariable @Min(1) Long userId,
                                     @PathVariable @Min(1) Long commentId,
                                     @RequestBody @Valid CommentUpdateDto commentUpdateDto) {
         return commentService.updateComment(userId, commentId, commentUpdateDto);
     }
 
-    @DeleteMapping("/comments/{commentId}")
+    @DeleteMapping("/users/{userId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable @Min(1) Long userId,
                               @PathVariable @Min(1) Long commentId) {
         commentService.deleteCommentByUser(userId, commentId);
     }
 
-    @GetMapping("/comments")
+    @GetMapping("/users/{userId}/comments")
     public List<CommentDto> getUserComments(@PathVariable @Min(1) Long userId,
                                             @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                             @RequestParam(defaultValue = "10") @Min(1) Integer size) {

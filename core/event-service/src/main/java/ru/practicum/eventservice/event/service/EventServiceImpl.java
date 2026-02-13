@@ -58,11 +58,9 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final UserOperations userOperations;
-
     private final CategoryRepository categoryRepository;
     private final RequestOperations requestOperations;
-    //private final ParticipationRequestRepository requestRepository;
-    private final StatsFeignClient statsClient; // в настройках переопределение
+    private final StatsFeignClient statsClient;
 
     @Override
     @Transactional
@@ -231,9 +229,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDtoOut find(Long userId, Long eventId) {
-//        if (!userRepository.existsById(userId)) {
-//            throw new NotFoundException("User", userId);
-//        }
         if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
@@ -301,9 +296,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventShortDtoOut> findByInitiator(Long userId, Integer offset, Integer limit) {
-//        if (!userRepository.existsById(userId)) {
-//            throw new NotFoundException("User", userId);
-//        }
         if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
@@ -316,6 +308,17 @@ public class EventServiceImpl implements EventService {
         return events.stream()
                 .map(eventMapper::toShortDto)
                 .toList();
+    }
+
+    @Override
+    public boolean getExistsById(Long eventId) {
+        return eventRepository.existsById(eventId);
+    }
+
+    @Override
+    public Optional<EventDtoOut> findById(Long eventId) {
+        Event event = getEvent(eventId);
+        return Optional.ofNullable(eventMapper.toDto(event));
     }
 
     @Transactional(readOnly = true)
@@ -371,12 +374,6 @@ public class EventServiceImpl implements EventService {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category", categoryId));
     }
-
-//    @SuppressWarnings("UnusedReturnValue")
-//    private User getUser(Long userId) {
-//        return userRepository.findById(userId)
-//                .orElseThrow(() -> new NotFoundException("User", userId));
-//    }
 
     @SuppressWarnings("UnusedReturnValue")
     private Event getEvent(Long eventId) {

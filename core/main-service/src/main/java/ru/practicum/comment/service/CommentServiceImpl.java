@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.comment.dto.CommentCreateDto;
 import ru.practicum.comment.dto.CommentDto;
 import ru.practicum.comment.dto.CommentUpdateDto;
+import ru.practicum.comment.dto.event.EventDtoOut;
+import ru.practicum.comment.dto.event.EventState;
 import ru.practicum.comment.mapper.CommentMapper;
 import ru.practicum.comment.model.Comment;
 import ru.practicum.comment.model.CommentStatus;
@@ -17,8 +19,6 @@ import ru.practicum.exception.NoAccessException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.feignClients.EventOperations;
 import ru.practicum.feignClients.UserOperations;
-import ru.practicum.participation.dto.event.EventDtoOut;
-import ru.practicum.participation.dto.event.EventState;
 
 import java.util.List;
 
@@ -32,7 +32,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserOperations userOperations;
     private final EventOperations eventOperations;
-    //private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -124,7 +123,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getEventComments(Long eventId, Pageable pageable) {
         log.info("Получение комментариев события {}", eventId);
 
-        if (!eventOperations.existsById(eventId)) {
+        if (!eventOperations.getExistsById(eventId)) {
             throw new NotFoundException("Event", eventId);
         }
 

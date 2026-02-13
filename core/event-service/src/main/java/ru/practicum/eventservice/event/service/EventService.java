@@ -9,6 +9,7 @@ import ru.practicum.eventservice.event.model.EventAdminFilter;
 import ru.practicum.eventservice.event.model.EventFilter;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface EventService {
 
@@ -27,4 +28,8 @@ public interface EventService {
     Collection<EventDtoOut> findFullEventsBy(EventAdminFilter filter);
 
     Collection<EventShortDtoOut> findByInitiator(Long userId, Integer offset, Integer limit);
+
+    boolean getExistsById(Long eventId);
+
+    Optional<EventDtoOut> findById(Long eventId);
 }

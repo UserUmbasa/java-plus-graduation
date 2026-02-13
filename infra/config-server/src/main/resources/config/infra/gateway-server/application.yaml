@@ -16,26 +16,30 @@ spring:
         locator:
           enabled: true
       routes:
-        # ---- основа ----
+        # ---- комменты ----
         - id: main_service_route
           uri: lb://main-service
           predicates:
-            - Path=/users/{userId}/events/{eventId}/requests/**, /users/{userId}/requests/**, /users/{userId}/requests/{requestId}/cancel/**, /events/requests/counts/**, /events/{eventId}/comments/**, /users/{userId}/**, /admin/comments/**
+            - Path=/events/{eventId}/comments/**, /admin/comments/**
 #          filters:
 #            - StripPrefix=1
 
-        # ---- основа ----
+        # ---- запросы ----
+        - id: request_service_route
+          uri: lb://request-service
+          predicates:
+            - Path=/users/{userId}/events/{eventId}/requests/**, /users/{userId}/requests/**, /users/{userId}/requests/{requestId}/cancel/**, /events/requests/counts/**
+
+        # ---- юзер ----
         - id: user_service_route
           uri: lb://user-service
           predicates:
             - Path=/admin/users/**
-#          filters:
-#            - StripPrefix=1
-
+        # ---- ивент ----
         - id: event_service_route
           uri: lb://event-service
           predicates:
-            - Path=/**
+            - Path=/users/{userId}/events**, /admin/categories**, /admin/categories/{id}, /admin/events/**, /events/**, /users/**, /admin/compilations/**, /compilations/**, /categories**, /categories/**
 
 # ---- Настройки логирования ----
 logging:

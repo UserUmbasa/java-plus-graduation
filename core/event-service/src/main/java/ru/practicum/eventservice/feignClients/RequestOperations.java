@@ -6,9 +6,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "main-service", path = "/events/requests/counts")
+@FeignClient(name = "request-service", path = "/events/requests/counts")
 public interface RequestOperations {
+
     @GetMapping
-    public List<Object[]> getConfirmedRequestsCountByEvents(
+    List<Object[]> getConfirmedRequestsCountByEvents(
             @RequestParam List<Long> eventIds);
 }

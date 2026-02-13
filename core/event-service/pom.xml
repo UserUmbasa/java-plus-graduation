@@ -23,13 +23,6 @@
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>ru.practicum</groupId>-->
-        <!--            <artifactId>interaction-api</artifactId>-->
-        <!--            <version>0.0.1-SNAPSHOT</version>-->
-        <!--            <scope>compile</scope>-->
-        <!--        </dependency>-->
-
         <!-- Feign Client для упрощенного создания HTTP клиентов -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

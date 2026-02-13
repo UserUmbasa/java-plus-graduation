@@ -1,14 +1,18 @@
 package ru.practicum.feignClients;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import ru.practicum.participation.dto.event.EventDtoOut;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import ru.practicum.comment.dto.event.EventDtoOut;
 
 import java.util.Optional;
 
 @FeignClient(name = "event-service", path = "/")
 public interface EventOperations {
 
-    Optional<EventDtoOut> findById(Long eventId);
+    @GetMapping("/admin/events/{eventId}")
+    Optional<EventDtoOut> findById(@PathVariable Long eventId);
 
-    boolean existsById(Long eventId);
+    @GetMapping("/admin/events/{eventId}/exists")
+    boolean getExistsById(@PathVariable Long eventId);
 }

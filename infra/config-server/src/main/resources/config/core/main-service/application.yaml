@@ -39,12 +39,3 @@ eureka:
 
 server:
     port: 0
-
-#discovery:
-#  services:
-#    stats-server-id: stats-server
-
-stats:
-    server:
-#      url: http://stats-server:9090
-      url: http://localhost:9090

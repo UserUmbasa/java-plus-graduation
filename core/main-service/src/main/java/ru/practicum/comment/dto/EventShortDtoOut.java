@@ -2,8 +2,8 @@ package ru.practicum.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import ru.practicum.participation.dto.event.CategoryDtoOut;
-import ru.practicum.user.dto.UserDtoOut;
+import ru.practicum.comment.dto.category.CategoryDtoOut;
+import ru.practicum.comment.dto.user.UserDtoOut;
 
 import java.time.LocalDateTime;
 

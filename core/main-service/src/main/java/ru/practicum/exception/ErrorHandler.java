@@ -1,6 +1,4 @@
 package ru.practicum.exception;
-
-import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,53 +19,16 @@ import java.util.Objects;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(FeignException.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Или какой статус вы хотите вернуть клиенту
-    public ErrorResponse handleFeignException(FeignException ex) {
-        return ErrorResponse.builder()
-                .message(ex.getMessage())
-                .status(HttpStatus.CONFLICT)
-                .reason("Condition not met.")
-                .timestamp(LocalDateTime.now())
-                .build();
-//        log.warn("Feign operation failed: Status {}, URL {}, Message {}", ex.status(), ex.request().url(), ex.getMessage(), ex);
-//
-//        // Здесь можно добавить логику, чтобы различать разные 4xx ошибки от Feign
-//        // Например, если ex.status() == 409, но тело ответа содержит "duplicate key"
-//        String errorMessage = ex.getMessage();
-//        HttpStatus status = HttpStatus.resolve(ex.status() != null ? ex.status() : 500); // Пытаемся получить статус из FeignException
-//
-//        if (status == null) {
-//            status = HttpStatus.INTERNAL_SERVER_ERROR;
-//        }
-//
-//        // Более детальная проверка статуса:
-//        if (ex.status() == 409 && errorMessage != null && errorMessage.contains("duplicate key value violates unique constraint")) {
-//            // Это ошибка дублирования email
-//            return ErrorResponse.builder()
-//                    .message("User with this email already exists.") // Ваше дружелюбное сообщение для клиента
-//                    .status(HttpStatus.CONFLICT) // Возвращаем 409 Conflict
-//                    .reason("Duplicate entry detected.")
-//                    .timestamp(LocalDateTime.now())
-//                    .build();
-//        } else if (ex.status() >= 400 && ex.status() < 500) {
-//            // Другие 4xx ошибки от Feign
-//            return ErrorResponse.builder()
-//                    .message("Bad request to upstream service: " + (errorMessage != null ? errorMessage : "Unknown error"))
-//                    .status(status)
-//                    .reason("Upstream service returned an error.")
-//                    .timestamp(LocalDateTime.now())
-//                    .build();
-//        } else {
-//            // Другие ошибки Feign (например, 5xx от бэкенда, или сетевые ошибки)
-//            return ErrorResponse.builder()
-//                    .message("Error communicating with upstream service: " + (errorMessage != null ? errorMessage : "Unknown error"))
-//                    .status(HttpStatus.INTERNAL_SERVER_ERROR) // ИлиHttpStatus.BAD_GATEWAY
-//                    .reason("Upstream service error or connection issue.")
-//                    .timestamp(LocalDateTime.now())
-//                    .build();
-//        }
-    }
+//    @ExceptionHandler(FeignException.class)
+//    @ResponseStatus(HttpStatus.CONFLICT) // Или какой статус вы хотите вернуть клиенту
+//    public ErrorResponse handleFeignException(FeignException ex) {
+//        return ErrorResponse.builder()
+//                .message(ex.getMessage())
+//                .status(HttpStatus.CONFLICT)
+//                .reason("Condition not met.")
+//                .timestamp(LocalDateTime.now())
+//                .build();
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -143,17 +104,6 @@ public class ErrorHandler {
                 .build();
     }
 
-    @ExceptionHandler(InvalidRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidRequestException(InvalidRequestException ex) {
-        return ErrorResponse.builder()
-                .message(ex.getMessage())
-                .reason("Bad request.")
-                .status(HttpStatus.BAD_REQUEST)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse onDataIntegrityViolationException(final DataIntegrityViolationException e) {
@@ -182,14 +132,4 @@ public class ErrorHandler {
                 .build();
     }
 
-    @ExceptionHandler(ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleForbiddenException(ForbiddenException ex) {
-        return ErrorResponse.builder()
-                .message(ex.getMessage())
-                .status(HttpStatus.FORBIDDEN)
-                .reason("Access denied.")
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
 }

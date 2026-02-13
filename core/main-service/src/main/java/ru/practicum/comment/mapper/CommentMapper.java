@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.comment.dto.CommentDto;
 import ru.practicum.comment.dto.EventShortDtoOut;
+import ru.practicum.comment.dto.event.EventDtoOut;
 import ru.practicum.comment.model.Comment;
 import ru.practicum.feignClients.EventOperations;
 import ru.practicum.feignClients.UserOperations;
-import ru.practicum.participation.dto.event.EventDtoOut;
 
 //@UtilityClass
 @Component

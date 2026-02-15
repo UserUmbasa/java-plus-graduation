@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS participation_requests
     CONSTRAINT chk_status CHECK (status IN ('PENDING', 'CONFIRMED', 'REJECTED', 'CANCELED'))
 );
 
-CREATE INDEX idx_requester_id ON participation_requests (requester_id);
-CREATE INDEX idx_event_id ON participation_requests (event_id);
-CREATE INDEX idx_status ON participation_requests (status);
-CREATE INDEX idx_created_at ON participation_requests (created_at);
+CREATE INDEX IF NOT EXISTS idx_requester_id ON participation_requests (requester_id);
+CREATE INDEX IF NOT EXISTS idx_event_id ON participation_requests (event_id);
+CREATE INDEX IF NOT EXISTS idx_status ON participation_requests (status);
+CREATE INDEX IF NOT EXISTS idx_created_at ON participation_requests (created_at);

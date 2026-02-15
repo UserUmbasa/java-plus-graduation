@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.practicum.requestservice.exception.ConditionNotMetException;
 import ru.practicum.requestservice.exception.ForbiddenException;
 import ru.practicum.requestservice.exception.NoAccessException;
@@ -30,34 +31,37 @@ import static ru.practicum.requestservice.participation.model.RequestStatus.CONF
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
     private final UserOperations userOperations;
     private final EventOperations eventOperations;
     private final ParticipationRequestRepository requestRepo;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         log.info("Пользователь {} пытается создать запрос участия для события {}", userId, eventId);
-        EventDtoOut event = getEventById(eventId);
+        EventDtoOut event = getEventById(eventId); // сеть
+        checkUserNotExists(userId); // сеть
+        checkRequestNotExists(userId, eventId); //база
+        checkNotEventInitiator(userId, event); // приват
+        checkEventIsPublished(event); // приват
+        checkParticipantLimit(event, eventId); //приват
 
-        checkUserNotExists(userId);
-        checkRequestNotExists(userId, eventId);
-        checkNotEventInitiator(userId, event);
-        checkEventIsPublished(event);
-        checkParticipantLimit(event, eventId);
-
-        RequestStatus status = determineRequestStatus(event);
+        RequestStatus stat = determineRequestStatus(event); // приват
 
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(userId);
         request.setEvent(eventId);
         request.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS));
-        request.setStatus(status);
-        log.info("Создана заявка от пользователя {} на событие {} со статусом {}", userId, eventId, status);
-        return ParticipationRequestMapper.toDto(requestRepo.save(request));
+        request.setStatus(stat);
+        log.info("Создана заявка от пользователя {} на событие {} со статусом {}", userId, eventId, stat);
+
+        return transactionTemplate.execute(status -> {
+            ParticipationRequest savedRequest = requestRepo.save(request);
+            return ParticipationRequestMapper.toDto(savedRequest);
+        });
     }
 
     @Override
@@ -65,23 +69,29 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (!userOperations.getExistsById(userId)) {
             throw new NotFoundException("User", userId);
         }
-        return requestRepo.findAllByRequester(userId).stream()
-                .map(ParticipationRequestMapper::toDto)
-                .toList();
+        return transactionTemplate.execute(status -> {
+            return requestRepo.findAllByRequester(userId).stream()
+                    .map(ParticipationRequestMapper::toDto)
+                    .toList();
+        });
     }
 
-    @Transactional
+    @Override
     public EventRequestStatusUpdateResult updateRequestStatuses(Long userId, Long eventId,
                                                                 EventRequestStatusUpdateRequest request) {
         EventDtoOut event = getEventWithCheck(userId, eventId);
-        List<ParticipationRequest> requests = getPendingRequestsOrThrow(request.getRequestIds());
-        return switch (request.getStatus()) {
-            case "CONFIRMED" -> confirmRequests(event, requests);
-            case "REJECTED" -> rejectRequests(requests);
-            default -> throw new IllegalArgumentException("Неправильный статус: " + request.getStatus());
-        };
+
+        return transactionTemplate.execute(status -> {
+            List<ParticipationRequest> requests = getPendingRequestsOrThrow(request.getRequestIds());
+            return switch (request.getStatus()) {
+                case "CONFIRMED" -> confirmRequests(event, requests);
+                case "REJECTED" -> rejectRequests(requests);
+                default -> throw new IllegalArgumentException("Неправильный статус: " + request.getStatus());
+            };
+        });
     }
 
+    @Transactional
     @Override
     public List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds) {
         return requestRepo.findConfirmedRequestCountsByEventIds(eventIds);
@@ -95,10 +105,12 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (!event.getInitiator().getId().equals(initiatorId)) {
             throw new NoAccessException("Только инициатор может просматривать запросы на проведение мероприятия");
         }
-        List<ParticipationRequest> allByEventId = requestRepo.findAllByEvent(eventId);
-        return allByEventId.stream()
-                .map(ParticipationRequestMapper::toDto)
-                .toList();
+        return transactionTemplate.execute(status -> {
+            List<ParticipationRequest> allByEventId = requestRepo.findAllByEvent(eventId);
+            return allByEventId.stream()
+                    .map(ParticipationRequestMapper::toDto)
+                    .toList();
+        });
     }
 
     @Override

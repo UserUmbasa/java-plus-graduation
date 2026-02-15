@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS comments (
     CONSTRAINT chk_comment_text CHECK (LENGTH(TRIM(text)) >= 1 AND LENGTH(text) <= 2000)
 );
 
-CREATE INDEX idx_event_id ON comments (event_id);
-CREATE INDEX idx_user_id ON comments (user_id);
-CREATE INDEX idx_status ON comments (status);
-CREATE INDEX idx_created_at ON comments (created_at);
-CREATE INDEX idx_updated_at ON comments (updated_at);
+CREATE INDEX IF NOT EXISTS idx_event_id ON comments (event_id);
+CREATE INDEX IF NOT EXISTS idx_user_id ON comments (user_id);
+CREATE INDEX IF NOT EXISTS idx_status ON comments (status);
+CREATE INDEX IF NOT EXISTS idx_created_at ON comments (created_at);
+CREATE INDEX IF NOT EXISTS idx_updated_at ON comments (updated_at);

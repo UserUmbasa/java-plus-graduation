@@ -24,6 +24,9 @@ public interface UserOperations {
                               @RequestParam(defaultValue = "0") @Min(0) int from,
                               @RequestParam(defaultValue = "10") @Min(1) int size);
 
+    @GetMapping("/ids")
+    List<UserDtoOut> getUsers(@RequestParam List<Long> ids);
+
     @GetMapping("/{userId}")
     UserDtoOut getUser(@PathVariable Long userId);
 

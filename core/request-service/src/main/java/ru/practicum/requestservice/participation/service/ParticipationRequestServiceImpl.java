@@ -36,14 +36,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     private final UserOperations userOperations;
     private final EventOperations eventOperations;
-    //private final EventRepository eventRepo;
     private final ParticipationRequestRepository requestRepo;
 
     @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         log.info("Пользователь {} пытается создать запрос участия для события {}", userId, eventId);
-
-        //Long userIdW = getUserById(userId);
         EventDtoOut event = getEventById(eventId);
 
         checkUserNotExists(userId);
@@ -93,7 +90,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<ParticipationRequestDto> getRequestsForEvent(Long eventId, Long initiatorId) {
         log.debug("getRequestsForEvent: {} of user: {}", eventId, initiatorId);
-        //getUserById(initiatorId);
         checkUserNotExists(initiatorId);
         EventDtoOut event = getEventById(eventId);
         if (!event.getInitiator().getId().equals(initiatorId)) {
@@ -117,14 +113,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setStatus(CANCELED);
         return ParticipationRequestMapper.toDto(requestRepo.save(request));
     }
-
-//    private Long getUserById(Long userId) {
-//        UserDtoOut result = userOperations.getUser(userId);
-//        if (result == null) {
-//            throw new NotFoundException("User", userId);
-//        }
-//        return result.getId();
-//    }
 
     private EventDtoOut getEventById(Long eventId) {
         return eventOperations.findById(eventId)

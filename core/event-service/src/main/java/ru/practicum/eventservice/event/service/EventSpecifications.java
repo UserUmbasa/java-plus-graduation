@@ -22,13 +22,6 @@ public class EventSpecifications {
                 );
     }
 
-//    public static Specification<Event> withUsers(List<Long> users) {
-//        if (users == null || users.isEmpty())
-//            return null;
-//        return (root, query, cb) ->
-//                root.get("initiator").get("id").in(users);
-//    }
-
     public static Specification<Event> withUsers(List<Long> users) {
         return (root, query, cb) -> {
             if (users == null || users.isEmpty()) {

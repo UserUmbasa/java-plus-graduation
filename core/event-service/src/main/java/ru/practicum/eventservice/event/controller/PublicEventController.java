@@ -116,7 +116,6 @@ public class PublicEventController {
                 .timestamp(timestamp)
                 .build();
 
-        //statsClient.saveHit(endpointHitDto);
         statsClient.createHit(endpointHitDto);
         return dtoOut;
     }
@@ -126,7 +125,6 @@ public class PublicEventController {
             return;
         }
         try {
-            //statsClient.saveHits(hits);
             for (EndpointHitDTO hit : hits) {
                 statsClient.createHit(hit);
             }

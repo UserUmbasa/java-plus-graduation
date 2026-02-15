@@ -34,6 +34,11 @@ public class AdminUserController {
         return userService.getUsers(ids, from, size);
     }
 
+    @GetMapping("/ids")
+    public List<UserDtoOut> getUsers(@RequestParam List<Long> ids) {
+        return userService.getUsers(ids);
+    }
+
     @GetMapping("/{userId}")
     public UserDtoOut getUser(@PathVariable Long userId) {
         return userService.getUser(userId);

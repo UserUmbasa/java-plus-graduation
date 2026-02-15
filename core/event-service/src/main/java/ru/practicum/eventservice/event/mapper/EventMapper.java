@@ -7,11 +7,10 @@ import ru.practicum.eventservice.event.dto.EventCreateDto;
 import ru.practicum.eventservice.event.dto.EventDtoOut;
 import ru.practicum.eventservice.event.dto.EventShortDtoOut;
 import ru.practicum.eventservice.event.dto.LocationDto;
+import ru.practicum.eventservice.event.dto.user.UserDtoOut;
 import ru.practicum.eventservice.event.model.Event;
 import ru.practicum.eventservice.feignClients.UserOperations;
 
-
-//@UtilityClass
 @Component
 @RequiredArgsConstructor
 public class EventMapper {
@@ -30,7 +29,7 @@ public class EventMapper {
                 .build();
     }
 
-    public EventDtoOut toDto(Event event) {
+    public EventDtoOut toDto(Event event, UserDtoOut user) {
         return EventDtoOut.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -39,7 +38,7 @@ public class EventMapper {
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
                 .description(event.getDescription())
-                .initiator(userOperations.getUser(event.getInitiator()))
+                .initiator(user)
                 .createdOn(event.getCreatedAt())
                 .state(event.getState())
                 .confirmedRequests(event.getConfirmedRequests())
@@ -52,7 +51,7 @@ public class EventMapper {
                 .build();
     }
 
-    public EventShortDtoOut toShortDto(Event event) {
+    public EventShortDtoOut toShortDto(Event event, UserDtoOut user) {
         return EventShortDtoOut.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -60,7 +59,7 @@ public class EventMapper {
                 .category(CategoryMapper.toDto(event.getCategory()))
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
-                .initiator(userOperations.getUser(event.getInitiator()))
+                .initiator(user)
                 .confirmedRequests(event.getConfirmedRequests())
                 .views(event.getViews())
                 .build();

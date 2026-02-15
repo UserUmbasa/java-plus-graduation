@@ -2,13 +2,12 @@ package ru.practicum.eventservice.event.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.eventservice.category.model.Category;
 import ru.practicum.eventservice.category.repository.CategoryRepository;
@@ -18,6 +17,7 @@ import ru.practicum.eventservice.event.dto.EventDtoOut;
 import ru.practicum.eventservice.event.dto.EventShortDtoOut;
 import ru.practicum.eventservice.event.dto.EventUpdateAdminDto;
 import ru.practicum.eventservice.event.dto.EventUpdateDto;
+import ru.practicum.eventservice.event.dto.user.UserDtoOut;
 import ru.practicum.eventservice.event.mapper.EventMapper;
 import ru.practicum.eventservice.event.model.Event;
 import ru.practicum.eventservice.event.model.EventAdminFilter;
@@ -49,7 +49,6 @@ import static ru.practicum.eventservice.constants.Constants.STATS_EVENTS_URL;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
     private static final int MIN_TIME_TO_UNPUBLISHED_EVENT = 2;
@@ -61,97 +60,112 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final RequestOperations requestOperations;
     private final StatsFeignClient statsClient;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
-    @Transactional
     public EventDtoOut add(Long userId, EventCreateDto eventDto) {
+        // 1. Делаем всё "внешнее" и валидацию
         validateEventDate(eventDto.getEventDate(), EventState.PENDING);
-        Category category = getCategory(eventDto.getCategoryId());
-        if (!userOperations.getExistsById(userId)) {
+        UserDtoOut user = userOperations.getUser(userId);
+        if (user == null) {
             throw new NotFoundException("User", userId);
         }
-        Event event = EventMapper.fromDto(eventDto);
-        event.setCategory(category);
-        event.setInitiator(userId);
-        event = eventRepository.save(event);
-        return eventMapper.toDto(event);
-    }
-
-    @Override
-    @Transactional
-    public EventDtoOut update(Long userId, Long eventId, EventUpdateDto eventDto) {
-        Event event = getEvent(eventId);
-        if (!event.getInitiator().equals(userId)) {
-            throw new NoAccessException("Редактировать событие может только инициатор");
-        }
-        if (event.getState() == EventState.PUBLISHED) {
-            throw new ConditionNotMetException("Не удается обновить опубликованное событие");
-        }
-        Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
-        Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event::setAnnotation);
-        Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
-        Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
-        Optional.ofNullable(eventDto.getLocation()).ifPresent(loc -> {
-            event.setLocationLat(loc.getLat());
-            event.setLocationLon(loc.getLon());
-        });
-        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
-        Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
-        if (eventDto.getCategoryId() != null
-                && !eventDto.getCategoryId().equals(event.getCategory().getId())) {
-            Category category = categoryRepository.findById(eventDto.getCategoryId())
-                    .orElseThrow(() -> new NotFoundException("Category", eventDto.getCategoryId()));
+        // 2. Открываем транзакцию только для работы с БД
+        return transactionTemplate.execute(status -> {
+            Category category = getCategory(eventDto.getCategoryId());
+            Event event = EventMapper.fromDto(eventDto);
             event.setCategory(category);
-        }
-        if (eventDto.getEventDate() != null) {
-            validateEventDate(eventDto.getEventDate(), event.getState());
-            event.setEventDate(eventDto.getEventDate());
-        }
-        if (eventDto.getStateAction() != null) {
-            switch (eventDto.getStateAction()) {
-                case SEND_TO_REVIEW -> event.setState(EventState.PENDING);
-                case CANCEL_REVIEW -> event.setState(EventState.CANCELED);
-            }
-        }
-        Event updated = eventRepository.save(event);
-        return eventMapper.toDto(updated);
+            event.setInitiator(userId);
+            event = eventRepository.save(event);
+            return eventMapper.toDto(event, user);
+        });
     }
 
     @Override
-    @Transactional
+    public EventDtoOut update(Long userId, Long eventId, EventUpdateDto eventDto) {
+        UserDtoOut user = userOperations.getUser(userId);
+        if (user == null) {
+            throw new NotFoundException("User", userId);
+        }
+        return transactionTemplate.execute(status -> {
+            Event event = getEvent(eventId);
+            if (!event.getInitiator().equals(userId)) {
+                throw new NoAccessException("Редактировать событие может только инициатор");
+            }
+            if (event.getState() == EventState.PUBLISHED) {
+                throw new ConditionNotMetException("Не удается обновить опубликованное событие");
+            }
+            Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
+            Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event::setAnnotation);
+            Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
+            Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
+            Optional.ofNullable(eventDto.getLocation()).ifPresent(loc -> {
+                event.setLocationLat(loc.getLat());
+                event.setLocationLon(loc.getLon());
+            });
+            Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
+            Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
+            if (eventDto.getCategoryId() != null
+                    && !eventDto.getCategoryId().equals(event.getCategory().getId())) {
+                Category category = categoryRepository.findById(eventDto.getCategoryId())
+                        .orElseThrow(() -> new NotFoundException("Category", eventDto.getCategoryId()));
+                event.setCategory(category);
+            }
+            if (eventDto.getEventDate() != null) {
+                validateEventDate(eventDto.getEventDate(), event.getState());
+                event.setEventDate(eventDto.getEventDate());
+            }
+            if (eventDto.getStateAction() != null) {
+                switch (eventDto.getStateAction()) {
+                    case SEND_TO_REVIEW -> event.setState(EventState.PENDING);
+                    case CANCEL_REVIEW -> event.setState(EventState.CANCELED);
+                }
+            }
+            Event updated = eventRepository.save(event);
+            return eventMapper.toDto(updated, user);
+        });
+    }
+
+    @Override
     public EventDtoOut update(Long eventId, EventUpdateAdminDto eventDto) {
         Event event = getEvent(eventId);
-        Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
-        Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event::setAnnotation);
-        Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
-        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
-        Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
-        Optional.ofNullable(eventDto.getLocation()).ifPresent(loc -> {
-            event.setLocationLat(loc.getLat());
-            event.setLocationLon(loc.getLon());
-        });
-        Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
-        Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
-        if (eventDto.getEventDate() != null) {
-            validateEventDate(eventDto.getEventDate(), event.getState());
-            event.setEventDate(eventDto.getEventDate());
-        }
-        if (eventDto.getStateAction() != null) {
-            switch (eventDto.getStateAction()) {
-                case PUBLISH_EVENT -> publishEvent(event);
-                case REJECT_EVENT -> rejectEvent(event);
+        UserDtoOut user = userOperations.getUser(event.getInitiator());
+        return transactionTemplate.execute(status -> {
+            Optional.ofNullable(eventDto.getTitle()).ifPresent(event::setTitle);
+            Optional.ofNullable(eventDto.getAnnotation()).ifPresent(event::setAnnotation);
+            Optional.ofNullable(eventDto.getDescription()).ifPresent(event::setDescription);
+            Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
+            Optional.ofNullable(eventDto.getPaid()).ifPresent(event::setPaid);
+            Optional.ofNullable(eventDto.getLocation()).ifPresent(loc -> {
+                event.setLocationLat(loc.getLat());
+                event.setLocationLon(loc.getLon());
+            });
+            Optional.ofNullable(eventDto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
+            Optional.ofNullable(eventDto.getRequestModeration()).ifPresent(event::setRequestModeration);
+            if (eventDto.getEventDate() != null) {
+                validateEventDate(eventDto.getEventDate(), event.getState());
+                event.setEventDate(eventDto.getEventDate());
             }
-        }
-        Event saved = eventRepository.save(event);
-        return eventMapper.toDto(saved);
+            if (eventDto.getStateAction() != null) {
+                switch (eventDto.getStateAction()) {
+                    case PUBLISH_EVENT -> publishEvent(event);
+                    case REJECT_EVENT -> rejectEvent(event);
+                }
+            }
+            Event saved = eventRepository.save(event);
+            return eventMapper.toDto(saved, user);
+        });
     }
 
     @Override
     public EventDtoOut findPublished(Long eventId) {
         Event event = eventRepository.findPublishedById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
-        enrichWithStats(Collections.singletonList(event));
-        return eventMapper.toDto(event);
+        UserDtoOut user = userOperations.getUser(event.getInitiator());
+        return transactionTemplate.execute(status -> {
+            enrichWithStats(Collections.singletonList(event));
+            return eventMapper.toDto(event, user);
+        });
     }
 
     private void enrichWithStats(List<Event> events) {
@@ -218,42 +232,40 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private Long getViewsCount(Long eventId) {
-        List<ViewStatsDTO> result = statsClient.getStats(
-                LocalDateTime.now().minusYears(10),
-                LocalDateTime.now().plusYears(10),
-                List.of(STATS_EVENTS_URL + eventId),
-                true);
-        return result.stream().count();
-    }
-
     @Override
     public EventDtoOut find(Long userId, Long eventId) {
-        if (!userOperations.getExistsById(userId)) {
+        UserDtoOut user = userOperations.getUser(userId);
+        if (user == null) {
             throw new NotFoundException("User", userId);
         }
-        Event event = getEvent(eventId);
-        if (!event.getInitiator().equals(userId)) {
-            throw new NoAccessException("Только инициатор может просматривать это событие");
-        }
-        enrichWithStats(Collections.singletonList(event));
-        return eventMapper.toDto(event);
+        return transactionTemplate.execute(status -> {
+            Event event = getEvent(eventId);
+            if (!event.getInitiator().equals(userId)) {
+                throw new NoAccessException("Только инициатор может просматривать это событие");
+            }
+            enrichWithStats(Collections.singletonList(event));
+            return eventMapper.toDto(event, user);
+        });
     }
 
     @Override
     public Collection<EventShortDtoOut> findShortEventsBy(EventFilter filter) {
         Specification<Event> spec = buildSpecification(filter);
-        return findBy(spec, filter.getPageable()).stream()
-                .map(eventMapper::toShortDto)
-                .toList();
+        Collection<Event> events = transactionTemplate.execute(status -> findBy(spec, filter.getPageable()));
+        Map<Long, UserDtoOut> usersMap = getUsersMap(events);
+        return events.stream()
+                .map(event -> eventMapper.toShortDto(event, usersMap.get(event.getInitiator())))
+                .collect(Collectors.toList());
     }
 
     @Override
     public Collection<EventDtoOut> findFullEventsBy(EventAdminFilter filter) {
         Specification<Event> spec = buildSpecification(filter);
-        return findBy(spec, filter.getPageable()).stream()
-                .map(eventMapper::toDto)
-                .toList();
+        Collection<Event> events = transactionTemplate.execute(status -> findBy(spec, filter.getPageable()));
+        Map<Long, UserDtoOut> usersMap = getUsersMap(events);
+        return events.stream()
+                .map(event -> eventMapper.toDto(event, usersMap.get(event.getInitiator())))
+                .collect(Collectors.toList());
     }
 
     private Collection<Event> findBy(Specification<Event> spec, Pageable pageable) {
@@ -296,19 +308,32 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventShortDtoOut> findByInitiator(Long userId, Integer offset, Integer limit) {
-        if (!userOperations.getExistsById(userId)) {
+        // 1. Вместо проверки существования, сразу получаем данные пользователя.
+        // Если getUser вернет null или выкинет 404 — мы сэкономим один вызов.
+        UserDtoOut initiator = userOperations.getUser(userId);
+        if (initiator == null) {
             throw new NotFoundException("User", userId);
         }
 
+        // 2. Получаем события из БД
         Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by("id"));
-        Page<Event> eventPage = eventRepository.findByInitiatorId(userId, pageable);
-        List<Event> events = eventPage.getContent();
+        List<Event> events = eventRepository.findByInitiatorId(userId, pageable).getContent();
+
+        // Если событий нет, можно сразу вернуть пустой список
+        if (events.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 3. Обогащаем статистикой (сетевой вызов к Stats Service)
         enrichWithStatsCollection(events);
 
+        // 4. Маппим. Нам НЕ НУЖНА usersMap, так как инициатор у всех один — наш 'initiator'
         return events.stream()
-                .map(eventMapper::toShortDto)
-                .toList();
+                .map(event -> eventMapper.toShortDto(event, initiator))
+                .collect(Collectors.toList());
     }
+
+
 
     @Override
     public boolean getExistsById(Long eventId) {
@@ -318,10 +343,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public Optional<EventDtoOut> findById(Long eventId) {
         Event event = getEvent(eventId);
-        return Optional.ofNullable(eventMapper.toDto(event));
+        UserDtoOut user = userOperations.getUser(event.getInitiator()); // !!!!!!!!!!
+        return Optional.ofNullable(eventMapper.toDto(event, user));
     }
 
-    @Transactional(readOnly = true)
     void enrichEventsWithConfirmedRequests(Collection<Event> events) {
         if (events == null || events.isEmpty()) {
             return;
@@ -395,5 +420,18 @@ public class EventServiceImpl implements EventService {
             throw new ConditionNotMetException("Опубликованные события не могут быть отклонены");
         }
         event.setState(EventState.CANCELED);
+    }
+
+    private Map<Long, UserDtoOut> getUsersMap(Collection<Event> events) {
+        if (events.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Long> userIds = events.stream()
+                .map(Event::getInitiator)
+                .distinct()
+                .collect(Collectors.toList());
+        return userOperations.getUsers(userIds)
+                .stream()
+                .collect(Collectors.toMap(UserDtoOut::getId, user -> user));
     }
 }

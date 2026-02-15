@@ -42,6 +42,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDtoOut> getUsers(List<Long> ids) {
+        List<User> users = userRepository.findUsers(ids, null);
+        return users.stream().map(UserMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
     public UserDtoOut getUser(Long userId) {
         User result = userRepository.findById(userId).orElse(null);
         return UserMapper.toDto(result);

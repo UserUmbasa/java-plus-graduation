@@ -5,17 +5,13 @@ import org.springframework.stereotype.Component;
 import ru.practicum.eventservice.compilation.dto.CompilationDto;
 import ru.practicum.eventservice.compilation.dto.NewCompilationDto;
 import ru.practicum.eventservice.compilation.model.Compilation;
-import ru.practicum.eventservice.event.mapper.EventMapper;
+import ru.practicum.eventservice.event.dto.EventShortDtoOut;
 import ru.practicum.eventservice.event.model.Event;
+import java.util.*;
 
-import java.util.Set;
-
-//@UtilityClass
 @Component
 @RequiredArgsConstructor
 public class CompilationMapper {
-
-    private final EventMapper eventMapper;
 
     public Compilation toEntity(NewCompilationDto dto, Set<Event> events) {
         return Compilation.builder()
@@ -25,14 +21,12 @@ public class CompilationMapper {
                 .build();
     }
 
-    public CompilationDto toDto(Compilation compilation) {
+    public CompilationDto toDto(Compilation compilation ,List<EventShortDtoOut> eventShortDtoOut) {
         return CompilationDto.builder()
                 .id(compilation.getId())
                 .title(compilation.getTitle())
                 .pinned(compilation.getPinned())
-                .events(compilation.getEvents().stream()
-                        .map(eventMapper::toShortDto)
-                        .toList())
+                .events(eventShortDtoOut)
                 .build();
     }
 }

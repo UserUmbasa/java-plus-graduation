@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHitDTO;
 import ru.practicum.dto.ViewStatsDTO;
@@ -16,7 +17,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-//@RequestMapping("/stats-server")
 public class HitController {
 
     private final HitService hitService;
@@ -26,6 +26,13 @@ public class HitController {
     public void createHit(@RequestBody EndpointHitDTO endpointHitDTO) {
         log.info("Received hit: {}", endpointHitDTO);
         hitService.createHit(endpointHitDTO);
+    }
+
+    @PostMapping("/hits")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void saveHits(List<EndpointHitDTO> hits) {
+        log.info("Received hits: {}", hits);
+        hitService.createHits(hits);
     }
 
     @GetMapping("/stats")

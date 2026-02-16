@@ -125,14 +125,11 @@ public class PublicEventController {
             return;
         }
         try {
-            for (EndpointHitDTO hit : hits) {
-                statsClient.createHit(hit);
-            }
+            statsClient.createHits(hits);
         } catch (Exception e) {
             log.warn("Batch save failed, falling back to single saves: {}", e.getMessage());
             for (EndpointHitDTO hit : hits) {
                 try {
-                    //statsClient.saveHit(hit);
                     statsClient.createHit(hit);
                 } catch (Exception ex) {
                     log.error("Failed to save hit: {}", ex.getMessage());

@@ -13,11 +13,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @FeignClient(name = "stats-server", url = "${stats.service.url:http://localhost:9090}")
-//@FeignClient(name = "stats-server")
 public interface StatsFeignClient {
 
     @PostMapping("/hit")
     void createHit(@RequestBody EndpointHitDTO endpointHitDTO);
+
+    @PostMapping("/hits")
+    void createHits(@RequestBody List<EndpointHitDTO> endpointHitDTO);
 
     @GetMapping("/stats")
     List<ViewStatsDTO> getStats(

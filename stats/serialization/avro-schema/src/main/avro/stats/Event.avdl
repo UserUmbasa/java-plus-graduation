@@ -1,0 +1,10 @@
+@namespace("ru.practicum.ewm.stats.avro")
+protocol EventSimilarityProtocol {
+    // информация о мероприятии
+	record EventAvro {
+		long id;
+		long categoryId;
+		double score;
+		timestamp_ms eventDate;
+	}
+}

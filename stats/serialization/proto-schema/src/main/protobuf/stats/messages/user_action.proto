@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package stats.messages;
+
+import "google/protobuf/timestamp.proto";
+import "stats/messages/action_type.proto";
+option java_multiple_files = true;
+option java_package = "ru.practicum.ewm.stats.proto";
+
+message UserActionProto {
+  int64 user_id = 1; // айди пользователя совершившего действия
+  int64 event_id = 2; // айди эвента
+  ActionTypeProto action_type = 3; // тип действия (один из 3)
+  google.protobuf.Timestamp timestamp = 4; //метка времени действия
+}

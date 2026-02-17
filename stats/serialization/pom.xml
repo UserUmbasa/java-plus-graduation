@@ -3,30 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>ru.practicum</groupId>
-        <artifactId>explore-with-me</artifactId>
+        <artifactId>stats</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-<!--        <relativePath>../pom.xml</relativePath>-->
     </parent>
 
-    <artifactId>stats</artifactId>
+    <artifactId>serialization</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <properties>
-
-    </properties>
-
     <modules>
-        <module>serialization</module>
-        <module>analyzer</module>
-        <module>aggregator</module>
-        <module>collector</module>
-        <module>stats-client</module>
-        <module>stats-dto</module>
-        <module>stats-server</module>
+        <module>avro-schema</module>
+        <module>proto-schema</module>
     </modules>
 
 </project>

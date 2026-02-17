@@ -17,6 +17,7 @@ public class ParticipationRequestController {
 
     private final ParticipationRequestService requestService;
 
+    // 2 событие (запрос на участие)
     @PostMapping("/users/{userId}/requests")
     public ResponseEntity<ParticipationRequestDto> createRequest(
             @PathVariable Long userId,

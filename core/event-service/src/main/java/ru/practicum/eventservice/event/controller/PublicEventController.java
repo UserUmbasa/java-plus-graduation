@@ -100,6 +100,7 @@ public class PublicEventController {
         return events;
     }
 
+    // событие - Просмотр мероприятия
     @GetMapping("/{eventId}")
     public EventDtoOut get(@PathVariable @Min(1) Long eventId,
                            HttpServletRequest request) {

@@ -1,19 +1,38 @@
 package ru.practicum.comment.mapper;
 
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.dto.EventShortDtoOut;
+import ru.practicum.comment.dto.event.EventDtoOut;
 import ru.practicum.comment.model.Comment;
-import ru.practicum.event.mapper.EventMapper;
-import ru.practicum.user.mapper.UserMapper;
+import ru.practicum.feignClients.EventOperations;
+import ru.practicum.feignClients.UserOperations;
 
-@UtilityClass
+//@UtilityClass
+@Component
+@RequiredArgsConstructor
 public class CommentMapper {
-    public static CommentDto toDto(Comment comment) {
+
+    private final UserOperations userOperations;
+    private final EventOperations eventOperations;
+
+    public CommentDto toDto(Comment comment) {
+        EventDtoOut eventDtoOut = eventOperations.findById(comment.getEvent()).orElse(null);
+        EventShortDtoOut eventShortDtoOut = EventShortDtoOut.builder()
+                .id(eventDtoOut.getId())
+                .title(eventDtoOut.getTitle())
+                .paid(eventDtoOut.getPaid())
+                .eventDate(eventDtoOut.getEventDate())
+                .views(eventDtoOut.getViews())
+                .confirmedRequests(eventDtoOut.getConfirmedRequests())
+                .build();
+
         return CommentDto.builder()
                 .id(comment.getId())
                 .text(comment.getText())
-                .event(EventMapper.toShortDto(comment.getEvent()))
-                .author(UserMapper.toDto(comment.getUser()))
+                .event(eventShortDtoOut)
+                .author(userOperations.getUser(comment.getUser()))
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
                 .status(comment.getStatus().name())

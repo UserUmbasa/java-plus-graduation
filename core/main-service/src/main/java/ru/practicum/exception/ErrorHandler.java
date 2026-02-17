@@ -1,5 +1,4 @@
 package ru.practicum.exception;
-
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,6 +18,17 @@ import java.util.Objects;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
+
+//    @ExceptionHandler(FeignException.class)
+//    @ResponseStatus(HttpStatus.CONFLICT) // Или какой статус вы хотите вернуть клиенту
+//    public ErrorResponse handleFeignException(FeignException ex) {
+//        return ErrorResponse.builder()
+//                .message(ex.getMessage())
+//                .status(HttpStatus.CONFLICT)
+//                .reason("Condition not met.")
+//                .timestamp(LocalDateTime.now())
+//                .build();
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -94,17 +104,6 @@ public class ErrorHandler {
                 .build();
     }
 
-    @ExceptionHandler(InvalidRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidRequestException(InvalidRequestException ex) {
-        return ErrorResponse.builder()
-                .message(ex.getMessage())
-                .reason("Bad request.")
-                .status(HttpStatus.BAD_REQUEST)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse onDataIntegrityViolationException(final DataIntegrityViolationException e) {
@@ -133,14 +132,4 @@ public class ErrorHandler {
                 .build();
     }
 
-    @ExceptionHandler(ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleForbiddenException(ForbiddenException ex) {
-        return ErrorResponse.builder()
-                .message(ex.getMessage())
-                .status(HttpStatus.FORBIDDEN)
-                .reason("Access denied.")
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
 }

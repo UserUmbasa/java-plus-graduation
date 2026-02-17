@@ -49,4 +49,28 @@ public class HitService {
             throw new IllegalArgumentException("Start date cannot be after end date");
         }
     }
+
+    @Transactional
+    public void createHits(List<EndpointHitDTO> hits) {
+        if (hits == null || hits.isEmpty()) {
+            log.warn("No hits to create");
+            return;
+        }
+
+        List<Hit> hitEntities = hits.stream()
+                .map(this::convertToHit)
+                .toList();
+
+        hitRepository.saveAll(hitEntities);
+        log.info("Saved {} hits", hitEntities.size());
+    }
+
+    private Hit convertToHit(EndpointHitDTO endpointHitDTO) {
+        return Hit.builder()
+                .app(endpointHitDTO.getApp())
+                .uri(endpointHitDTO.getUri())
+                .ip(endpointHitDTO.getIp())
+                .timestamp(LocalDateTime.parse(endpointHitDTO.getTimestamp(), FORMATTER))
+                .build();
+    }
 }

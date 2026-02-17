@@ -1,5 +1,5 @@
 server:
-  port: 8181
+  port: 8080
 
 spring:
   application:
@@ -16,21 +16,30 @@ spring:
         locator:
           enabled: true
       routes:
-        # ---- статистика ----
-        - id: stats_server_route
-          uri: lb://stats-server
-          predicates:
-            - Path=/stats-server/**
-          filters:
-            - StripPrefix=1
-
-        # ---- основа ----
+        # ---- комменты ----
         - id: main_service_route
           uri: lb://main-service
           predicates:
-            - Path=/main-service/**
-          filters:
-            - StripPrefix=1
+            - Path=/events/{eventId}/comments/**, /admin/comments/**
+#          filters:
+#            - StripPrefix=1
+
+        # ---- запросы ----
+        - id: request_service_route
+          uri: lb://request-service
+          predicates:
+            - Path=/users/{userId}/events/{eventId}/requests/**, /users/{userId}/requests/**, /users/{userId}/requests/{requestId}/cancel/**, /events/requests/counts/**
+
+        # ---- юзер ----
+        - id: user_service_route
+          uri: lb://user-service
+          predicates:
+            - Path=/admin/users/**
+        # ---- ивент ----
+        - id: event_service_route
+          uri: lb://event-service
+          predicates:
+            - Path=/users/{userId}/events**, /admin/categories**, /admin/categories/{id}, /admin/events/**, /events/**, /users/**, /admin/compilations/**, /compilations/**, /categories**, /categories/**
 
 # ---- Настройки логирования ----
 logging:

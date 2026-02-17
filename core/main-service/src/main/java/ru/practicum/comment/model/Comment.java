@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import ru.practicum.event.model.Event;
-import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -26,13 +24,11 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
+    @Column(name = "event_id", nullable = false)
+    private Long event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long user;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;

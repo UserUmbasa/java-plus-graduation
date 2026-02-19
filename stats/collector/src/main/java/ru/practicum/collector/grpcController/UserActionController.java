@@ -18,7 +18,6 @@ public class UserActionController extends UserActionControllerGrpc.UserActionCon
     @Override
     public void collectUserAction(UserActionProto request, StreamObserver<Empty> responseObserver) {
         collectorService.collectUserAction(request);
-        System.out.println("odovdgrntogbnryoynjonjyonbynbnby--------------------------------------");
         // после обработки события возвращаем ответ клиенту
         responseObserver.onNext(Empty.getDefaultInstance());
         // и завершаем обработку запроса

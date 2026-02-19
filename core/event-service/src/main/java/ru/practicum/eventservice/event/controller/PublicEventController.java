@@ -9,7 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.client.UserActionClient;
+//import ru.practicum.client.UserActionClient;
+import ru.practicum.eventservice.feignClients.UserActionClient;
 import ru.practicum.eventservice.event.dto.event.EventDtoOut;
 import ru.practicum.eventservice.event.dto.event.EventShortDtoOut;
 import ru.practicum.eventservice.event.model.EventFilter;

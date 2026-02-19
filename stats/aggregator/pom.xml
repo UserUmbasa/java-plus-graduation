@@ -17,13 +17,12 @@
 
 	<dependencies>
 
-		<!--        &lt;!&ndash; API для взаимодействия &ndash;&gt;-->
-		<!--        <dependency>-->
-		<!--            <groupId>ru.practicum</groupId>-->
-		<!--            <artifactId>stats-dto</artifactId>-->
-		<!--            <version>0.0.1-SNAPSHOT</version>-->
-		<!--            <scope>compile</scope>-->
-		<!--        </dependency>-->
+		        <!-- API для взаимодействия -->
+		        <dependency>
+		            <groupId>ru.practicum</groupId>
+		            <artifactId>avro-schema</artifactId>
+		            <version>0.0.1-SNAPSHOT</version>
+		        </dependency>
 
 
 		<!-- Eureka Client для обнаружения сервисов в микросервисной архитектуре -->
@@ -69,8 +68,12 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

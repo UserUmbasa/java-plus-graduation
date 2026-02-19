@@ -1,6 +1,6 @@
 spring:
   application:
-    name: aggregator-service
+    name: aggregator
 
   # Настройки Eureka клиента
 eureka:

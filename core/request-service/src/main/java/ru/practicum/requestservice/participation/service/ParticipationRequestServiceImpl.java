@@ -31,7 +31,6 @@ import static ru.practicum.requestservice.participation.model.RequestStatus.CONF
 
 @Slf4j
 @Service
-//@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
@@ -95,6 +94,13 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds) {
         return requestRepo.findConfirmedRequestCountsByEventIds(eventIds);
+    }
+
+    @Override
+    public ParticipationRequestDto findByRequesterAndEvent(Long userId, Long eventId) {
+        ParticipationRequest request = requestRepo.findByRequesterAndEvent(userId, eventId)
+                .orElseThrow(() -> new NotFoundException("Запроса пользователя на мероприятие не найдено", userId));
+        return ParticipationRequestMapper.toDto(request);
     }
 
     @Override

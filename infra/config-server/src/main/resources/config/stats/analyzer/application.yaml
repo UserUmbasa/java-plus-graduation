@@ -1,6 +1,6 @@
 spring:
   application:
-    name: analyzer-service
+    name: analyzer
 
   # Настройки Eureka клиента
 eureka:

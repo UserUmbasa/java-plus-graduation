@@ -1,6 +1,6 @@
 spring:
   application:
-    name: collector-service
+    name: collector
 #  main:
 #    allow-bean-definition-overriding: true # ! переопределение бинов
   config:

@@ -37,5 +37,13 @@ eureka:
     # Явно задаем формат ID, чтобы там был IP, а не имя хоста
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
+grpc:
+  client:
+    collector:
+      address: "discovery:///collector"
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: PLAINTEXT
+
 server:
     port: 0

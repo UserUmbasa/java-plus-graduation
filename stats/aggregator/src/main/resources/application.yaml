@@ -1,6 +1,6 @@
 spring:
   application:
-    name: aggregator-service
+    name: aggregator
 #  main:
 #    allow-bean-definition-overriding: true # ! переопределение бинов
   config:

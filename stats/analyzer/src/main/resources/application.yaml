@@ -1,8 +1,6 @@
 spring:
   application:
-    name: analyzer-service
-#  main:
-#    allow-bean-definition-overriding: true # ! переопределение бинов
+    name: analyzer
   config:
     import: "configserver:"
   cloud:

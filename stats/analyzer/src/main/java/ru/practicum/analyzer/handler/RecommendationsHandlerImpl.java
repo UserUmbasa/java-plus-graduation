@@ -17,8 +17,6 @@ import ru.practicum.ewm.stats.proto.UserPredictionsRequestProto;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -137,6 +135,9 @@ public class RecommendationsHandlerImpl implements RecommendationsHandler {
 
         Double sumScores = (viewedEventScores.values().stream().mapToDouble(Double::doubleValue).sum());
 
+        if (sumScores == 0) {
+            return 0.0;
+        }
         return sumWeights / sumScores;
     }
 }

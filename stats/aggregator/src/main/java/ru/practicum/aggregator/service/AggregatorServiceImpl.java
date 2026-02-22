@@ -72,7 +72,6 @@ public class AggregatorServiceImpl implements AggregatorService {
                     .build();
             result.add(eventSimilarity);
         }
-
         log.info("Результат расчета: {}", result);
         return result;
     }
@@ -100,14 +99,12 @@ public class AggregatorServiceImpl implements AggregatorService {
         Long eventId = action.getEventId();
         Double eventWeight = eventUserWeight.get(eventId).getOrDefault(userId, 0.0);
         log.info("Расчитываем минимальную сумму для события {}, с событиями: {}", eventId, eventIdsForCalculate);
-
         if (eventWeight.equals(0.0) || diffWeight.equals(0.0)) {
             log.info("Вес действия для события {} равен 0 или не изменился, не делаем расчет", eventId);
             return;
         }
         Double oldEventWeight = eventWeight - diffWeight;
         log.info("Старый вес: {}, для события {}, пользователя {}", oldEventWeight, eventId, userId);
-
         for (Long otherEventId : eventIdsForCalculate) {
             Double otherEventWeight = eventUserWeight.get(otherEventId).getOrDefault(userId, 0.0);
             log.info("Вес: {}, для события {}, пользователя {}", otherEventWeight, otherEventId, userId);
@@ -115,7 +112,6 @@ public class AggregatorServiceImpl implements AggregatorService {
                 log.info("Вес действия для события {} равен 0, не делаем расчет", otherEventId);
                 continue;
             }
-
             Long first = Math.min(eventId, otherEventId);
             Long second = Math.max(eventId, otherEventId);
             Map<Long, Double> map = twoEventsMinSum.get(first);

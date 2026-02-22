@@ -20,5 +20,5 @@ public interface ParticipationRequestService {
 
     List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds);
 
-    ParticipationRequestDto findByRequesterAndEvent(Long userId, Long requestId);
+    ParticipationRequestDto findByRequesterAndEvent(Long requestId, Long eventId);
 }

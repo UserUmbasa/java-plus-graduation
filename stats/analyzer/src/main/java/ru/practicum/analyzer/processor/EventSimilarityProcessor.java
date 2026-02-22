@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,80 +12,72 @@ import ru.practicum.analyzer.kafka.KafkaClient;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
 
 @Slf4j
 @Component
 public class EventSimilarityProcessor implements Runnable {
+
     private final Consumer<Long, EventSimilarityAvro> similarityConsumer;
     private final EventSimilarityHandler similarityHandler;
+    private final String eventsSimilarityTopic;
 
-    private static final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
+    private volatile boolean running = true;
+
     private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
 
-
-    @Value("${analyzer.kafka.topics.events-similarity}")
-    private String eventsSimilarityTopic;
-
-    public EventSimilarityProcessor(KafkaClient kafkaClient, EventSimilarityHandler similarityHandler) {
+    public EventSimilarityProcessor(
+            KafkaClient kafkaClient,
+            EventSimilarityHandler similarityHandler,
+            @Value("${analyzer.kafka.topics.events-similarity}") String eventsSimilarityTopic) {
         this.similarityConsumer = kafkaClient.getKafkaEventSimilarityConsumer();
         this.similarityHandler = similarityHandler;
+        this.eventsSimilarityTopic = eventsSimilarityTopic;
     }
 
     @Override
     public void run() {
-        Runtime.getRuntime().addShutdownHook(new Thread(similarityConsumer::wakeup));
+        log.info("EventSimilarityProcessor запущен.");
         try {
-            similarityConsumer.subscribe(List.of(eventsSimilarityTopic));
-            while (true) {
+            similarityConsumer.subscribe(Collections.singletonList(eventsSimilarityTopic));
+
+            while (running) {
                 ConsumerRecords<Long, EventSimilarityAvro> records = similarityConsumer.poll(CONSUME_ATTEMPT_TIMEOUT);
+
                 if (!records.isEmpty()) {
-                    int count = 0;
                     for (ConsumerRecord<Long, EventSimilarityAvro> record : records) {
-                        EventSimilarityAvro avro = record.value();
-
-                        log.info("{}: отправка в handler", EventSimilarityProcessor.class.getSimpleName());
-                        similarityHandler.handleEventSimilarity(avro);
-
-                        manageOffsets(record, count, similarityConsumer);
-                        count++;
+                        try {
+                            log.debug("Обработка сообщения: partition={}, offset={}, value={}",
+                                    record.partition(), record.offset(), record.value());
+                            similarityHandler.handleEventSimilarity(record.value());
+                        } catch (Exception e) {
+                            log.error("Ошибка при обработке конкретного события (offset {}): {}",
+                                    record.offset(), e.getMessage());
+                        }
                     }
+
                     similarityConsumer.commitAsync();
                 }
             }
         } catch (WakeupException ignored) {
-
+            log.info("EventSimilarityProcessor: получен сигнал остановки (Wakeup).");
         } catch (Exception e) {
-            log.error("{}: Ошибка обработки EventSimilarity", EventSimilarityProcessor.class.getSimpleName(), e);
+            log.error("Критическая ошибка в EventSimilarityProcessor: {}", e.getMessage(), e);
         } finally {
             try {
                 similarityConsumer.commitSync();
+                log.info("Финальные оффсеты успешно зафиксированы.");
+            } catch (Exception e) {
+                log.error("Ошибка при финальной фиксации оффсетов: {}", e.getMessage());
             } finally {
-                log.info("{}: Закрыть консьюмер", EventSimilarityProcessor.class.getSimpleName());
                 similarityConsumer.close();
+                log.info("EventSimilarityProcessor: консьюмер закрыт.");
             }
         }
     }
 
-    private static void manageOffsets(
-            ConsumerRecord<Long, EventSimilarityAvro> record,
-            int count,
-            Consumer<Long, EventSimilarityAvro> consumer
-    ) {
-
-        currentOffsets.put(
-                new TopicPartition(record.topic(), record.partition()),
-                new OffsetAndMetadata(record.offset() + 1)
-        );
-
-        if (count % 10 == 0) {
-            consumer.commitAsync(currentOffsets, (offsets, exception) -> {
-                if (exception != null) {
-                    log.warn("Ошибка фиксации оффсетов: {}", offsets, exception);
-                }
-            });
-        }
+    public void stop() {
+        this.running = false;
+        similarityConsumer.wakeup();
     }
 }

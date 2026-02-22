@@ -97,9 +97,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
-    public ParticipationRequestDto findByRequesterAndEvent(Long userId, Long eventId) {
-        ParticipationRequest request = requestRepo.findByRequesterAndEvent(userId, eventId)
-                .orElseThrow(() -> new NotFoundException("Запроса пользователя на мероприятие не найдено", userId));
+    public ParticipationRequestDto findByRequesterAndEvent(Long requestId, Long eventId) {
+        ParticipationRequest request = requestRepo.findByRequesterAndEvent(requestId, eventId)
+                .orElseThrow(() -> new NotFoundException("Запроса пользователя на мероприятие не найдено", requestId));
         return ParticipationRequestMapper.toDto(request);
     }
 

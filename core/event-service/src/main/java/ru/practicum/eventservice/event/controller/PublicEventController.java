@@ -35,7 +35,6 @@ public class PublicEventController {
 
     private final EventService eventService;
     private final UserActionClient userActionClient;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @GetMapping
     public Collection<EventShortDtoOut> getEvents(

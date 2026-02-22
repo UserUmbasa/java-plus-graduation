@@ -1,7 +1,6 @@
 @namespace("ru.practicum.ewm.stats.avro")
 
 protocol EventSimilarityProtocol {
-    import idl "Event.avdl";
     // отражает сходство между 2 мероприятиями
     // содержит упорядоченные айди мероприятий
     // оценку сходства и метку времени

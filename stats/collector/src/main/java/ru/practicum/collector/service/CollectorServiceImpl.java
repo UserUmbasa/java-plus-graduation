@@ -21,7 +21,7 @@ public class CollectorServiceImpl <T extends SpecificRecordBase> implements Coll
     @Override
     public void collectUserAction(UserActionProto request) {
         UserActionAvro userActionAvro = mapper.mapToAvro(request);
-        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+        ProducerRecord<Long, SpecificRecordBase> record = new ProducerRecord<>(
                 TOPIC,
                 null,
                 userActionAvro);

@@ -100,9 +100,11 @@ http  GET  /admin/comments?events=1,2&users=3&from=0&size=20
 ⚠️  Обработка ошибок
 Формат ответа об ошибке
 
-json  {  "message": "Текст ошибки",  "reason":  
-"Причина ошибки",  "status": "HTTP_STATUS",  
-"timestamp": "2024-01-15 12:00:00"  }
+json  {  
+    "message": "Текст ошибки",  "reason":  
+    "Причина ошибки",  "status": "HTTP_STATUS",  
+    "timestamp": "2024-01-15 12:00:00"  
+}
 
 
 ## Код Ситуация

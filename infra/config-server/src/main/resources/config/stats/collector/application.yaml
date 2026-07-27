@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: collector
+
+kafka:
+  topic:
+  bootstrap:
+    server: localhost:9092
+  value-serializer: ru.practicum.avroschema.serializer.GeneralAvroSerializer
+
+
+#server:
+#  port: 0

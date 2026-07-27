@@ -6,49 +6,40 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.4</version>
+		<version>3.3.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<name>Explore With Me</name>
+	<modules>
+		<module>stats</module>
+		<module>core</module>
+		<module>infra</module>
+
+	</modules>
 
 	<groupId>ru.practicum</groupId>
 	<artifactId>explore-with-me</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<!--	<properties>-->
-	<!--		<java.version>21</java.version>-->
-	<!--		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
-	<!--	</properties>-->
-
-	<modules>
-		<module>stats</module>
-		<module>core</module>
-		<module>infra</module>
-	</modules>
-
 	<properties>
 		<java.version>21</java.version>
-		<lombok.version>1.18.34</lombok.version>
-		<mapstruct.version>1.6.3</mapstruct.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<avro.version>1.11.3</avro.version>
 		<kafka-clients.version>3.6.1</kafka-clients.version>
 		<springdoc-openapi-starter.version>2.6.0</springdoc-openapi-starter.version>
 		<grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version>
 		<protobuf.version>3.23.4</protobuf.version>
 		<grpc.version>1.63.0</grpc.version>
-
+		<spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
 		<!--       Plugins       -->
-		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
 		<avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version>
 		<protobuf-plugin.version>2.4.0</protobuf-plugin.version>
-
-		<spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
 	</properties>
-
 	<dependencyManagement>
 		<dependencies>
+			<!-- Spring Cloud BOM -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
@@ -74,7 +65,6 @@
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 				<version>${springdoc-openapi-starter.version}</version>
 			</dependency>
-
 			<!--    GRPC dependencies management        -->
 			<dependency>
 				<groupId>net.devh</groupId>
@@ -89,6 +79,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>net.devh</groupId>
+				<artifactId>grpc-client-spring-boot-starter</artifactId>
+				<version>${grpc-spring-boot-starter.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-stub</artifactId>
 				<version>${grpc.version}</version>
@@ -99,8 +95,12 @@
 				<artifactId>grpc-protobuf</artifactId>
 				<version>${grpc.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>33.2.1-jre</version>
+			</dependency>
 
-			<!--    / GRPC dependencies management        -->
 		</dependencies>
 
 
@@ -227,6 +227,19 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+
+
+				<plugin>
+					<groupId>org.apache.avro</groupId>
+					<artifactId>avro-maven-plugin</artifactId>
+					<version>${avro-maven-plugin.version}</version>
+				</plugin>
+
+				<plugin>
+					<groupId>io.github.ascopes</groupId>
+					<artifactId>protobuf-maven-plugin</artifactId>
+					<version>${protobuf-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

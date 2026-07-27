@@ -21,17 +21,6 @@ import java.util.Objects;
 @RestControllerAdvice
 public class ErrorHandler {
 
-//    @ExceptionHandler(FeignException.class)
-//    @ResponseStatus(HttpStatus.CONFLICT)
-//    public ErrorResponse handleFeignException(FeignException ex) {
-//        return ErrorResponse.builder()
-//                .message(ex.getMessage())
-//                .status(HttpStatus.CONFLICT)
-//                .reason("Condition not met.")
-//                .timestamp(LocalDateTime.now())
-//                .build();
-//    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {

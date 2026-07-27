@@ -3,10 +3,12 @@ package ru.practicum.requestservice.participation.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.requestservice.participation.dto.ParticipationRequestDto;
 import ru.practicum.requestservice.participation.model.ParticipationRequest;
 import ru.practicum.requestservice.participation.model.RequestStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
     boolean existsByRequesterAndEvent(Long userId, Long eventId);
@@ -31,4 +33,5 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             GROUP BY pr.event""")
     List<Object[]> findConfirmedRequestCountsByEventIds(@Param("eventIds") List<Long> eventIds);
 
+    Optional<ParticipationRequest> findByRequesterAndEvent(Long requesterId, Long eventId);
 }

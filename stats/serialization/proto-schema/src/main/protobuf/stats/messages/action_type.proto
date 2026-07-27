@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package stats.messages;
+
+option java_multiple_files = true;
+option java_package = "ru.practicum.ewm.stats.proto";
+
+//события
+enum ActionTypeProto {
+  ACTION_VIEW = 0;      // просмотр мероприятия
+  ACTION_REGISTER = 1;  // регистрация на мероприятие (запрос)
+  ACTION_LIKE = 2;      // лайк мероприятия
+}

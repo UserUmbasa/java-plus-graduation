@@ -31,7 +31,6 @@ import static ru.practicum.requestservice.participation.model.RequestStatus.CONF
 
 @Slf4j
 @Service
-//@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
@@ -42,12 +41,12 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         log.info("Пользователь {} пытается создать запрос участия для события {}", userId, eventId);
-        EventDtoOut event = getEventById(eventId); // сеть
-        checkUserNotExists(userId); // сеть
+        EventDtoOut event = getEventById(eventId); // сеть EventOperations
+        checkUserNotExists(userId); // сеть UserOperations
         checkRequestNotExists(userId, eventId); //база
-        checkNotEventInitiator(userId, event); // приват
-        checkEventIsPublished(event); // приват
-        checkParticipantLimit(event, eventId); //приват
+        checkNotEventInitiator(userId, event); // локально
+        checkEventIsPublished(event); // локально
+        checkParticipantLimit(event, eventId); //локально
 
         RequestStatus stat = determineRequestStatus(event); // приват
 
@@ -95,6 +94,13 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds) {
         return requestRepo.findConfirmedRequestCountsByEventIds(eventIds);
+    }
+
+    @Override
+    public ParticipationRequestDto findByRequesterAndEvent(Long requestId, Long eventId) {
+        ParticipationRequest request = requestRepo.findByRequesterAndEvent(requestId, eventId)
+                .orElseThrow(() -> new NotFoundException("Запроса пользователя на мероприятие не найдено", requestId));
+        return ParticipationRequestMapper.toDto(request);
     }
 
     @Override

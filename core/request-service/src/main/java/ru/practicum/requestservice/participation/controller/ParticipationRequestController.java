@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+//import ru.practicum.client.UserActionClient;
+import ru.practicum.requestservice.feignClients.UserActionClient;
 import ru.practicum.requestservice.participation.dto.ParticipationRequestDto;
 import ru.practicum.requestservice.participation.service.ParticipationRequestService;
 
@@ -16,13 +18,15 @@ import java.util.List;
 public class ParticipationRequestController {
 
     private final ParticipationRequestService requestService;
+    private final UserActionClient userActionClient;
 
+    // 2 событие (запрос на участие)
     @PostMapping("/users/{userId}/requests")
     public ResponseEntity<ParticipationRequestDto> createRequest(
             @PathVariable Long userId,
             @RequestParam Long eventId) {
-
         ParticipationRequestDto createdRequest = requestService.createRequest(userId, eventId);
+        userActionClient.sendRegistration(userId, eventId);
         return new ResponseEntity<>(createdRequest, HttpStatus.CREATED);
     }
 
@@ -45,5 +49,13 @@ public class ParticipationRequestController {
             @RequestParam List<Long> eventIds) {
         List<Object[]> requestsCountsList = requestService.getConfirmedRequestsCountByEvents(eventIds);
         return ResponseEntity.ok(requestsCountsList);
+    }
+
+    @GetMapping("/events/requests/counts/{requestId}/{eventId}/")
+    public ResponseEntity<ParticipationRequestDto> findByRequesterAndEvent(
+            @PathVariable Long requestId,
+            @PathVariable Long eventId) {
+        ParticipationRequestDto result = requestService.findByRequesterAndEvent(requestId, eventId);
+        return ResponseEntity.ok(result);
     }
 }

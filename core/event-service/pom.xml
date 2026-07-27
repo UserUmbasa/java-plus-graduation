@@ -21,7 +21,13 @@
             <groupId>ru.practicum</groupId>
             <artifactId>stats-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+<!--            <scope>compile</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>ru.practicum</groupId>
+            <artifactId>proto-schema</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <!-- Feign Client для упрощенного создания HTTP клиентов -->
         <dependency>

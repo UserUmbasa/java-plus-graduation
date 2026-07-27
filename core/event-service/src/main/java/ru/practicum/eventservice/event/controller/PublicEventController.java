@@ -8,25 +8,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.dto.EndpointHitDTO;
-import ru.practicum.eventservice.event.dto.EventDtoOut;
-import ru.practicum.eventservice.event.dto.EventShortDtoOut;
+import org.springframework.web.bind.annotation.*;
+//import ru.practicum.client.UserActionClient;
+import ru.practicum.eventservice.feignClients.UserActionClient;
+import ru.practicum.eventservice.event.dto.event.EventDtoOut;
+import ru.practicum.eventservice.event.dto.event.EventShortDtoOut;
 import ru.practicum.eventservice.event.model.EventFilter;
 import ru.practicum.eventservice.event.model.EventState;
 import ru.practicum.eventservice.event.service.EventService;
 import ru.practicum.eventservice.exception.InvalidRequestException;
-import ru.practicum.eventservice.statsclient.StatsFeignClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.practicum.eventservice.constants.Constants.DATE_TIME_FORMAT;
 
@@ -39,8 +34,7 @@ import static ru.practicum.eventservice.constants.Constants.DATE_TIME_FORMAT;
 public class PublicEventController {
 
     private final EventService eventService;
-    private final StatsFeignClient statsClient; // в настройках переопределение
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final UserActionClient userActionClient;
 
     @GetMapping
     public Collection<EventShortDtoOut> getEvents(
@@ -75,81 +69,25 @@ public class PublicEventController {
             }
         }
 
-        Collection<EventShortDtoOut> events = eventService.findShortEventsBy(filter);
-        String clientIp = getClientIp(request);
-        String timestamp = LocalDateTime.now().format(FORMATTER);
-
-        List<EndpointHitDTO> hits = events.stream()
-                .map(event -> EndpointHitDTO.builder()
-                        .app("events")
-                        .uri("/events/" + event.getId())
-                        .ip(clientIp)
-                        .timestamp(timestamp)
-                        .build())
-                .collect(Collectors.toList());
-
-        hits.add(EndpointHitDTO.builder()
-                .app("events")
-                .uri("/events")
-                .ip(clientIp)
-                .timestamp(timestamp)
-                .build());
-
-        saveHitsBatch(hits);
-
-        return events;
+        return eventService.findShortEventsBy(filter);
     }
 
+    // событие - Просмотр мероприятия
     @GetMapping("/{eventId}")
     public EventDtoOut get(@PathVariable @Min(1) Long eventId,
                            HttpServletRequest request) {
         log.debug("запрос на публикацию идентификатора события:{}", eventId);
         EventDtoOut dtoOut = eventService.findPublished(eventId);
-
-        String clientIp = getClientIp(request);
-        String timestamp = LocalDateTime.now().format(FORMATTER);
-
-        EndpointHitDTO endpointHitDto = EndpointHitDTO.builder()
-                .app("events")
-                .uri("/events/" + eventId)
-                .ip(clientIp)
-                .timestamp(timestamp)
-                .build();
-
-        statsClient.createHit(endpointHitDto);
+        userActionClient.sendView(dtoOut.getInitiator().getId(), dtoOut.getId());
         return dtoOut;
     }
 
-    private void saveHitsBatch(List<EndpointHitDTO> hits) {
-        if (hits.isEmpty()) {
-            return;
-        }
-        try {
-            statsClient.createHits(hits);
-        } catch (Exception e) {
-            log.warn("Batch save failed, falling back to single saves: {}", e.getMessage());
-            for (EndpointHitDTO hit : hits) {
-                try {
-                    statsClient.createHit(hit);
-                } catch (Exception ex) {
-                    log.error("Failed to save hit: {}", ex.getMessage());
-                }
-            }
-        }
+    @PutMapping("/{eventId}/like")
+    public void likeEvent(@PathVariable long eventId, @RequestHeader("X-EWM-USER-ID") long userId) {
+        log.debug("запрос на публикацию лайка к события:{}", eventId);
+        eventService.likeEvent(userId, eventId);
+        userActionClient.sendLike(userId, eventId);
     }
 
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
-    }
 }
 

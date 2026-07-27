@@ -19,4 +19,6 @@ public interface ParticipationRequestService {
     EventRequestStatusUpdateResult updateRequestStatuses(Long userId, Long eventId, EventRequestStatusUpdateRequest request);
 
     List<Object[]> getConfirmedRequestsCountByEvents(List<Long> eventIds);
+
+    ParticipationRequestDto findByRequesterAndEvent(Long requestId, Long eventId);
 }

@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.eventservice.event.dto.EventCreateDto;
-import ru.practicum.eventservice.event.dto.EventDtoOut;
-import ru.practicum.eventservice.event.dto.EventShortDtoOut;
-import ru.practicum.eventservice.event.dto.EventUpdateDto;
+import ru.practicum.eventservice.event.dto.event.EventCreateDto;
+import ru.practicum.eventservice.event.dto.event.EventDtoOut;
+import ru.practicum.eventservice.event.dto.event.EventShortDtoOut;
+import ru.practicum.eventservice.event.dto.event.EventUpdateDto;
 import ru.practicum.eventservice.event.service.EventService;
 
 import java.util.Collection;

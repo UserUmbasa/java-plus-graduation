@@ -8,15 +8,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
-import ru.practicum.dto.ViewStatsDTO;
 import ru.practicum.eventservice.category.model.Category;
 import ru.practicum.eventservice.category.repository.CategoryRepository;
 
-import ru.practicum.eventservice.event.dto.EventCreateDto;
-import ru.practicum.eventservice.event.dto.EventDtoOut;
-import ru.practicum.eventservice.event.dto.EventShortDtoOut;
-import ru.practicum.eventservice.event.dto.EventUpdateAdminDto;
-import ru.practicum.eventservice.event.dto.EventUpdateDto;
+import ru.practicum.eventservice.event.dto.event.EventCreateDto;
+import ru.practicum.eventservice.event.dto.event.EventDtoOut;
+import ru.practicum.eventservice.event.dto.event.EventShortDtoOut;
+import ru.practicum.eventservice.event.dto.event.EventUpdateAdminDto;
+import ru.practicum.eventservice.event.dto.event.EventUpdateDto;
+import ru.practicum.eventservice.event.dto.participation.ParticipationRequestDto;
+import ru.practicum.eventservice.event.dto.participation.RequestStatus;
 import ru.practicum.eventservice.event.dto.user.UserDtoOut;
 import ru.practicum.eventservice.event.mapper.EventMapper;
 import ru.practicum.eventservice.event.model.Event;
@@ -24,26 +25,15 @@ import ru.practicum.eventservice.event.model.EventAdminFilter;
 import ru.practicum.eventservice.event.model.EventFilter;
 import ru.practicum.eventservice.event.model.EventState;
 import ru.practicum.eventservice.event.repository.EventRepository;
-import ru.practicum.eventservice.exception.ConditionNotMetException;
-import ru.practicum.eventservice.exception.NoAccessException;
-import ru.practicum.eventservice.exception.NotFoundException;
+import ru.practicum.eventservice.exception.*;
 import ru.practicum.eventservice.feignClients.RequestOperations;
 import ru.practicum.eventservice.feignClients.UserOperations;
-import ru.practicum.eventservice.statsclient.StatsFeignClient;
 
 import java.time.LocalDateTime;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static ru.practicum.eventservice.constants.Constants.STATS_EVENTS_URL;
 
 
 @Slf4j
@@ -59,7 +49,6 @@ public class EventServiceImpl implements EventService {
     private final UserOperations userOperations;
     private final CategoryRepository categoryRepository;
     private final RequestOperations requestOperations;
-    private final StatsFeignClient statsClient;
     private final TransactionTemplate transactionTemplate;
 
     @Override
@@ -173,7 +162,6 @@ public class EventServiceImpl implements EventService {
             return;
         }
         enrichEventsWithConfirmedRequests(events);
-        enrichWithViewsCountCollection(events);
     }
 
     void enrichWithStatsCollection(Collection<Event> events) {
@@ -182,54 +170,6 @@ public class EventServiceImpl implements EventService {
         }
         List<Event> eventList = new ArrayList<>(events);
         enrichEventsWithConfirmedRequests(eventList);
-        enrichWithViewsCountCollection(eventList);
-    }
-
-    private void enrichWithViewsCountCollection(Collection<Event> events) {
-        if (events.isEmpty()) {
-            return;
-        }
-
-        List<Long> eventIds = events.stream()
-                .map(Event::getId)
-                .collect(Collectors.toList());
-
-        Map<Long, Long> eventViewsMap = getViewsCountForEvents(eventIds);
-
-        events.forEach(event ->
-                event.setViews(eventViewsMap.getOrDefault(event.getId(), 0L))
-        );
-    }
-
-    private Map<Long, Long> getViewsCountForEvents(List<Long> eventIds) {
-        if (eventIds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        List<String> uris = eventIds.stream()
-                .map(id -> STATS_EVENTS_URL + id)
-                .collect(Collectors.toList());
-
-        List<ViewStatsDTO> stats = statsClient.getStats(
-                LocalDateTime.now().minusYears(10),
-                LocalDateTime.now().plusYears(10),
-                uris,
-                true);
-
-        return stats.stream()
-                .collect(Collectors.toMap(
-                        stat -> extractEventIdFromUri(stat.getUri()),
-                        ViewStatsDTO::getHits
-                ));
-    }
-
-    private Long extractEventIdFromUri(String uri) {
-        try {
-            return Long.parseLong(uri.substring(STATS_EVENTS_URL.length()));
-        } catch (NumberFormatException e) {
-            log.warn("Failed to extract eventId from uri: {}", uri);
-            return -1L;
-        }
     }
 
     @Override
@@ -308,26 +248,16 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Collection<EventShortDtoOut> findByInitiator(Long userId, Integer offset, Integer limit) {
-        // 1. Вместо проверки существования, сразу получаем данные пользователя.
-        // Если getUser вернет null или выкинет 404 — мы сэкономим один вызов.
         UserDtoOut initiator = userOperations.getUser(userId);
         if (initiator == null) {
             throw new NotFoundException("User", userId);
         }
-
-        // 2. Получаем события из БД
         Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by("id"));
         List<Event> events = eventRepository.findByInitiatorId(userId, pageable).getContent();
-
-        // Если событий нет, можно сразу вернуть пустой список
         if (events.isEmpty()) {
             return Collections.emptyList();
         }
-
-        // 3. Обогащаем статистикой (сетевой вызов к Stats Service)
         enrichWithStatsCollection(events);
-
-        // 4. Маппим. Нам НЕ НУЖНА usersMap, так как инициатор у всех один — наш 'initiator'
         return events.stream()
                 .map(event -> eventMapper.toShortDto(event, initiator))
                 .collect(Collectors.toList());
@@ -345,6 +275,14 @@ public class EventServiceImpl implements EventService {
         Event event = getEvent(eventId);
         UserDtoOut user = userOperations.getUser(event.getInitiator()); // !!!!!!!!!!
         return Optional.ofNullable(eventMapper.toDto(event, user));
+    }
+
+    @Override
+    public void likeEvent(long userId, long eventId) {
+        ParticipationRequestDto request = requestOperations.findByRequesterIdAndEventId(userId, eventId);
+        if (!RequestStatus.CONFIRMED.name().equals(request.getStatus())) {
+            throw new InvalidRequestException("Пользователь может лайкать только посещённые мероприятия");
+        }
     }
 
     void enrichEventsWithConfirmedRequests(Collection<Event> events) {

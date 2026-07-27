@@ -23,7 +23,7 @@ services:
       - POSTGRES_DB=stats
 
   ewm-service:
-    build: main-service
+    build: ./core/main-service
     image: with_me_plus-ewm
     container_name: with_me_plus-ewm
     ports:

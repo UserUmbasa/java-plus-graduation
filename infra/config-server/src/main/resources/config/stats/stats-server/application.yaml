@@ -5,10 +5,9 @@ spring:
     init:
       mode: always
   datasource:
-    driverClassName: "org.postgresql.Driver"
-    url: "jdbc:postgresql://localhost:6432/stats"
-    username: "test"
-    password: "test"
+    url: jdbc:postgresql://${STATS_DB_HOST:localhost}:${STATS_DB_PORT:6432}/${STATS_DB_NAME:stats}
+    username: ${STATS_DB_USER:test}
+    password: ${STATS_DB_PASSWORD:test}
   jpa:
     hibernate:
       ddl-auto: create-drop #none
@@ -38,4 +37,4 @@ eureka:
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
 server:
-  port: 9090 #0
+  port: ${STATS_SERVER_PORT:9090} #0

@@ -21,9 +21,9 @@ spring:
       mode: always
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:6432/analyzer
-    username: test
-    password: test
+    url: jdbc:postgresql://${STATS_DB_HOST:localhost}:${STATS_DB_PORT:6432}/${STATS_DB_NAME:analyzer}
+    username: ${STATS_DB_USER:test}
+    password: ${STATS_DB_PASSWORD:test}
 
 analyzer:
   kafka:

@@ -5,10 +5,10 @@ spring:
     init:
       mode: always
   datasource:
-    driverClassName: "org.postgresql.Driver"
-    url: "jdbc:postgresql://localhost:6434/user-service"
-    username: "test"
-    password: "test"
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://${USER_DB_HOST:localhost}:${USER_DB_PORT:6434}/${USER_DB_NAME:user-service}
+    username: ${USER_DB_USER:test}
+    password: ${USER_DB_PASSWORD:test}
   jpa:
     hibernate:
       ddl-auto: create-drop #none

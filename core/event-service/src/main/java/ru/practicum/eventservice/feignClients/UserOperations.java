@@ -1,5 +1,6 @@
 package ru.practicum.eventservice.feignClients;
 
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.cloud.openfeign.FeignClient;

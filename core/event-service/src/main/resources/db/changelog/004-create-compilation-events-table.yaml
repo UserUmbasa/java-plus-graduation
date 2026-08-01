@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-create-compilation-events-table
+      author: artem
+
+      changes:
+        - createTable:
+            schemaName: event
+            tableName: compilation_events
+
+            columns:
+              - column:
+                  name: compilation_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            schemaName: event
+            tableName: compilation_events
+            columnNames: compilation_id, event_id
+            constraintName: pk_compilation_events
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: event
+            baseTableName: compilation_events
+            baseColumnNames: compilation_id
+
+            referencedTableSchemaName: event
+            referencedTableName: compilations
+            referencedColumnNames: id
+
+            constraintName: fk_compilation_events_compilation
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableSchemaName: event
+            baseTableName: compilation_events
+            baseColumnNames: event_id
+
+            referencedTableSchemaName: event
+            referencedTableName: events
+            referencedColumnNames: id
+
+            constraintName: fk_compilation_events_event
+            onDelete: CASCADE

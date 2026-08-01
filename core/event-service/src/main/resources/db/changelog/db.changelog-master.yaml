@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - include:
+      file: 000-create-schema.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 001-create-categories-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 002-create-events-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 003-create-compilations-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 004-create-compilation-events-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 005-create-indexes.yaml
+      relativeToChangelogFile: true

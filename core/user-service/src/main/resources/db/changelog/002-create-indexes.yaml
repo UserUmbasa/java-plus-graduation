@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-indexes
+      author: artem
+
+      changes:
+        - createIndex:
+            schemaName: user_service
+            tableName: users
+            indexName: idx_name
+            columns:
+              - column:
+                  name: name
+
+        - createIndex:
+            schemaName: user_service
+            tableName: users
+            indexName: idx_email
+            columns:
+              - column:
+                  name: email

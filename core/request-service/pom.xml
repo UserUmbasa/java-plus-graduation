@@ -15,6 +15,13 @@
     </properties>
 
     <dependencies>
+
+        <!-- Liquibase для управления миграциями БД -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
         <!-- Feign Client для упрощенного создания HTTP клиентов -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

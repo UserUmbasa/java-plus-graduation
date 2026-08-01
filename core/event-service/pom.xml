@@ -29,6 +29,13 @@
             <artifactId>proto-schema</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <!-- Liquibase для управления миграциями БД -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
         <!-- Feign Client для упрощенного создания HTTP клиентов -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

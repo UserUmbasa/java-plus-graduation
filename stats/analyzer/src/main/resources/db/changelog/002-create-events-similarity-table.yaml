@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-events-similarity-table
+      author: artem
+
+      changes:
+        - createTable:
+            schemaName: analyzer
+            tableName: events_similarity
+
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_events_similarity
+                    nullable: false
+
+              - column:
+                  name: event_a
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: event_b
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: score
+                  type: DOUBLE PRECISION
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            schemaName: analyzer
+            tableName: events_similarity
+            columnNames: event_a, event_b
+            constraintName: uq_events_similarity_pair

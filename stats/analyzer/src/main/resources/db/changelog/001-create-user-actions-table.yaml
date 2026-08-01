@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-user-actions-table
+      author: artem
+
+      changes:
+        - createTable:
+            schemaName: analyzer
+            tableName: user_actions
+
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_user_actions
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: weight
+                  type: DOUBLE PRECISION
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            schemaName: analyzer
+            tableName: user_actions
+            columnNames: user_id, event_id
+            constraintName: uq_user_actions_user_event

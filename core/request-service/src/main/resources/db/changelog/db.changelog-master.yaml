@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - include:
+      file: 000-create-schema.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 001-create-participation-requests-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: 002-create-indexes.yaml
+      relativeToChangelogFile: true

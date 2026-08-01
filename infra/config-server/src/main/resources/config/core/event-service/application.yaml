@@ -37,8 +37,6 @@ eureka:
     # Явно задаем формат ID, чтобы там был IP, а не имя хоста
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
-server:
-    port: 0
 grpc:
   client:
       collector:
@@ -46,3 +44,7 @@ grpc:
         enableKeepAlive: true
         keepAliveWithoutCalls: true
         negotiationType: PLAINTEXT
+
+server:
+  port: 8080
+#  port: 0 # Для локального запуска нескольких сервисов из IDE

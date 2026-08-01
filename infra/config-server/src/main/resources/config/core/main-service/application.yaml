@@ -38,4 +38,5 @@ eureka:
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
 server:
-    port: 0
+  port: 8080
+#  port: 0 # Для локального запуска нескольких сервисов из IDE

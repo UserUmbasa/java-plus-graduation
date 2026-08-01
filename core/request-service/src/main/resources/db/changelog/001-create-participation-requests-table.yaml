@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-participation-requests-table
+      author: artem
+
+      changes:
+        - createTable:
+            schemaName: request
+            tableName: participation_requests
+
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_participation_requests
+                    nullable: false
+
+              - column:
+                  name: requester_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+        - sql:
+            sql: |
+              ALTER TABLE request.participation_requests
+              ADD CONSTRAINT chk_status
+              CHECK (status IN ('PENDING', 'CONFIRMED', 'REJECTED', 'CANCELED'));

@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-comments-table
+      author: artem
+
+      changes:
+        - createTable:
+            schemaName: main
+            tableName: comments
+
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_comments
+                    nullable: false
+
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: text
+                  type: TEXT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: PUBLISHED
+                  constraints:
+                    nullable: false
+
+        - sql:
+            sql: |
+              ALTER TABLE main.comments
+              ADD CONSTRAINT chk_comment_status
+              CHECK (status IN ('PUBLISHED', 'EDITED', 'DELETED'));
+
+        - sql:
+            sql: |
+              ALTER TABLE main.comments
+              ADD CONSTRAINT chk_comment_text
+              CHECK (LENGTH(TRIM(text)) >= 1 AND LENGTH(text) <= 2000);

@@ -16,13 +16,15 @@ public class UserAction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "event_id")
+    @Column(name = "event_id", nullable = false)
     private Long eventId;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(nullable = false)
     private Double weight;
 
+    @Column(nullable = false)
     private Instant timestamp;
 }

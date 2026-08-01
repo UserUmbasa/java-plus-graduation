@@ -1,24 +1,186 @@
 services:
-  stats-db:
-    image: postgres:16.1
-    container_name: postgres-ewm-stats-db
+  discovery-server:
+    build:
+      context: ./infra
+      dockerfile: discovery-server/Dockerfile
+    image: discovery-server
+    container_name: discovery-server
     ports:
-      - "6542:5432"
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "-q", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  config-server:
+    build:
+      context: ./infra
+      dockerfile: config-server/Dockerfile
+    image: config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
     environment:
-      - POSTGRES_USER=stat
-      - POSTGRES_PASSWORD=stat
-      - POSTGRES_DB=ewm-stats
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  gateway-server:
+    build:
+      context: ./infra
+      dockerfile: gateway-server/Dockerfile
+    image: gateway-server
+    container_name: gateway-server
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sleep 20
+        exec java ${JAVA_OPTS} -jar /gateway-server.jar
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+#----------------------------user-service----------------------------------
+  user-service:
+    build:
+      context: ./core
+      dockerfile: user-service/Dockerfile
+    image: user-service
+    container_name: user-service
+#    ports:
+#      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+      USER_DB_HOST: user-db
+      USER_DB_PORT: 5432
+      USER_DB_NAME: ewm-user
+      USER_DB_USER: user
+      USER_DB_PASSWORD: user
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-server:
+        condition: service_healthy
+      user-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  user-db:
+    image: postgres:16.1
+    container_name: postgres-user-db
+    ports:
+      - "6543:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user
+      - POSTGRES_DB=ewm-user
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
       interval: 5s
       retries: 10
 
-  ewm-db:
+  #----------------------------event-service----------------------------------
+  event-service:
+    build:
+      context: ./core
+      dockerfile: event-service/Dockerfile
+    image: event-service
+    container_name: event-service
+    #    ports:
+    #      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+      EVENT_DB_HOST: event-db
+      EVENT_DB_PORT: 5432
+      EVENT_DB_NAME: ewm-event
+      EVENT_DB_USER: event
+      EVENT_DB_PASSWORD: event
+    depends_on:
+      user-service:
+        condition: service_healthy
+      event-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  event-db:
     image: postgres:16.1
-    container_name: postgres-ewm-main-db
+    container_name: postgres-event-db
     ports:
-      - "6543:5432"
+      - "6435:5432"
+    environment:
+      - POSTGRES_USER=event
+      - POSTGRES_PASSWORD=event
+      - POSTGRES_DB=ewm-event
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+
+  #----------------------------main-service----------------------------------
+  main-service:
+    build:
+      context: ./core
+      dockerfile: main-service/Dockerfile
+    image: main-service
+    container_name: main-service
+    #    ports:
+    #      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+      MAIN_DB_HOST: main-db
+      MAIN_DB_PORT: 5432
+      MAIN_DB_NAME: ewm-main
+      MAIN_DB_USER: main
+      MAIN_DB_PASSWORD: main
+    depends_on:
+      user-service:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+      main-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  main-db:
+    image: postgres:16.1
+    container_name: postgres-main-db
+    ports:
+      - "6433:5432"
     environment:
       - POSTGRES_USER=main
       - POSTGRES_PASSWORD=main
@@ -29,27 +191,96 @@ services:
       interval: 5s
       retries: 10
 
-  db-init:
-    image: postgres:16.1
-    container_name: init-main-db
+  #----------------------------request-service----------------------------------
+  request-service:
+    build:
+      context: ./core
+      dockerfile: request-service/Dockerfile
+    image: request-service
+    container_name: request-service
+    #    ports:
+    #      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+      REQUEST_DB_HOST: request-db
+      REQUEST_DB_PORT: 5432
+      REQUEST_DB_NAME: ewm-request
+      REQUEST_DB_USER: request
+      REQUEST_DB_PASSWORD: request
     depends_on:
-      ewm-db:
+      user-service:
         condition: service_healthy
-    entrypoint: |
-      bash -c '
-      set -e
-      until psql postgresql://main:main@ewm-db:5432/ewm-main -c "\q"; do
-        echo "PostgreSQL is unavailable - sleeping"
-        sleep 1
-      done
-      
-      psql postgresql://main:main@ewm-db:5432/ewm-main -v ON_ERROR_STOP=1 <<EOSQL
-      CREATE DATABASE ewm_category;
-      CREATE DATABASE ewm_user;
-      CREATE DATABASE ewm_request;
-      CREATE DATABASE ewm_analyzer;
-      EOSQL
-      '
+      event-service:
+        condition: service_healthy
+      request-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  request-db:
+    image: postgres:16.1
+    container_name: postgres-request-db
+    ports:
+      - "6437:5432"
+    environment:
+      - POSTGRES_USER=request
+      - POSTGRES_PASSWORD=request
+      - POSTGRES_DB=ewm-request
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  #----------------------------analyzer----------------------------------
+  analyzer:
+    build:
+      context: ./stats
+      dockerfile: analyzer/Dockerfile
+    image: analyzer
+    container_name: analyzer
+    #    ports:
+    #      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka/
+      STATS_DB_HOST: stats-db
+      STATS_DB_PORT: 5432
+      STATS_DB_NAME: ewm-stats
+      STATS_DB_USER: stats
+      STATS_DB_PASSWORD: stats
+    depends_on:
+      user-service:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+      stats-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  stats-db:
+    image: postgres:16.1
+    container_name: postgres-stats-db
+    ports:
+      - "6432:5432"
+    environment:
+      - POSTGRES_USER=stats
+      - POSTGRES_PASSWORD=stats
+      - POSTGRES_DB=ewm-stats
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+
+
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka

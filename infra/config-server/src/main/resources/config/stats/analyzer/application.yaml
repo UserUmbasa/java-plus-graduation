@@ -5,25 +5,42 @@ grpc:
 spring:
   application:
     name: analyzer
+
   output:
     ansi:
       enabled: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop #none
-    show-sql: true
-    properties:
-      hibernate:
-        default_schema: analyzer
-        format_sql: true
+
   sql:
     init:
-      mode: always
+      mode: never # Не использовать schema.sql/data.sql
+
+  liquibase:
+    enabled: true # Включить Liquibase
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://${STATS_DB_HOST:localhost}:${STATS_DB_PORT:6432}/${STATS_DB_NAME:analyzer}
     username: ${STATS_DB_USER:test}
     password: ${STATS_DB_PASSWORD:test}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Только проверять соответствие Entity и БД
+
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+    properties:
+      hibernate:
+        default_schema: analyzer # Hibernate работает со схемой analyzer
+        format_sql: true          # Красивый вывод SQL
+
+    show-sql: true # Показывать SQL в логах
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 analyzer:
   kafka:
@@ -36,6 +53,7 @@ analyzer:
           key.deserializer: org.apache.kafka.common.serialization.LongDeserializer
           value.deserializer: ru.practicum.avroschema.deserializer.UserActionAvroDeserializer
           enable.auto.commit: false
+
       event-similarity:
         properties:
           client.id: analyzerEventSimilarityConsumer
@@ -44,6 +62,7 @@ analyzer:
           key.deserializer: org.apache.kafka.common.serialization.LongDeserializer
           value.deserializer: ru.practicum.avroschema.deserializer.EventSimilarityAvroDeserializer
           enable.auto.commit: false
+
     topics:
       user-actions: stats.user-actions.v1
       events-similarity: stats.events-similarity.v1

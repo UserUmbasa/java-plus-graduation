@@ -1,48 +1,107 @@
+#spring:
+#  application:
+#    name: event-service
+#  sql:
+#    init:
+#      mode: always
+#  datasource:
+#    driverClassName: org.postgresql.Driver
+#    url: jdbc:postgresql://${EVENT_DB_HOST:localhost}:${EVENT_DB_PORT:6435}/${EVENT_DB_NAME:event-service}
+#    username: ${EVENT_DB_USER:test}
+#    password: ${EVENT_DB_PASSWORD:test}
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate #none
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    properties:
+#      hibernate:
+#        default_schema: event
+#        format_sql: true
+#
+#    show-sql: true  # Добавляем здесь
+#    logging: # Добавляем секцию логирования
+#      level:
+#        org:
+#          hibernate:
+#            SQL: DEBUG
+#            type:
+#              descriptor:
+#                sql:
+#                  BasicBinder: TRACE
+#
+#  # Настройки Eureka клиента
+#eureka:
+#  instance:
+#    # Использовать IP вместо имени хоста (решает проблему с DNS)
+#    prefer-ip-address: true
+#    # Явно задаем формат ID, чтобы там был IP, а не имя хоста
+#    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
+#
+#grpc:
+#  client:
+#      collector:
+#        address: "discovery:///collector"
+#        enableKeepAlive: true
+#        keepAliveWithoutCalls: true
+#        negotiationType: PLAINTEXT
+#
+#server:
+#  port: 8080
+##  port: 0 # Для локального запуска нескольких сервисов из IDE
+
+
 spring:
   application:
     name: event-service
+
   sql:
     init:
-      mode: always
+      mode: never # Не использовать schema.sql/data.sql
+
+  liquibase:
+    enabled: true # Включить Liquibase
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://${EVENT_DB_HOST:localhost}:${EVENT_DB_PORT:6435}/${EVENT_DB_NAME:event-service}
     username: ${EVENT_DB_USER:test}
     password: ${EVENT_DB_PASSWORD:test}
+
   jpa:
     hibernate:
-      ddl-auto: create-drop #none
+      ddl-auto: validate # Только проверять соответствие Entity и БД
+
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
     properties:
       hibernate:
-        default_schema: event
-        format_sql: true
+        default_schema: event # Hibernate работает со схемой event
+        format_sql: true       # Красивый вывод SQL
 
-    show-sql: true  # Добавляем здесь
-    logging: # Добавляем секцию логирования
-      level:
-        org:
-          hibernate:
-            SQL: DEBUG
-            type:
-              descriptor:
-                sql:
-                  BasicBinder: TRACE
+    show-sql: true # Показывать SQL в логах
 
-  # Настройки Eureka клиента
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# ---------- Eureka ----------
 eureka:
   instance:
-    # Использовать IP вместо имени хоста (решает проблему с DNS)
     prefer-ip-address: true
-    # Явно задаем формат ID, чтобы там был IP, а не имя хоста
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
-server:
-    port: 0
+# ---------- gRPC ----------
 grpc:
   client:
-      collector:
-        address: "discovery:///collector"
-        enableKeepAlive: true
-        keepAliveWithoutCalls: true
-        negotiationType: PLAINTEXT
+    collector:
+      address: discovery:///collector
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: PLAINTEXT
+
+# ---------- HTTP ----------
+server:
+  port: 8080
+# port: 0 # Для локального запуска нескольких экземпляров из IDE

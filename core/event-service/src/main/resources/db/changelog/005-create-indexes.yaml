@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-indexes
+      author: artem
+
+      changes:
+        # ---------- events ----------
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_category_id
+            columns:
+              - column:
+                  name: category_id
+
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_initiator_id
+            columns:
+              - column:
+                  name: initiator_id
+
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_event_date
+            columns:
+              - column:
+                  name: event_date
+
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_created_at
+            columns:
+              - column:
+                  name: created_at
+
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_published_on
+            columns:
+              - column:
+                  name: published_on
+
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_state
+            columns:
+              - column:
+                  name: state
+
+        - createIndex:
+            schemaName: event
+            tableName: events
+            indexName: idx_events_location
+            columns:
+              - column:
+                  name: location_lat
+              - column:
+                  name: location_lon
+
+        # ---------- compilations ----------
+        - createIndex:
+            schemaName: event
+            tableName: compilations
+            indexName: idx_compilations_title
+            columns:
+              - column:
+                  name: title
+
+        - createIndex:
+            schemaName: event
+            tableName: compilations
+            indexName: idx_compilations_pinned
+            columns:
+              - column:
+                  name: pinned
+
+        # ---------- compilation_events ----------
+        - createIndex:
+            schemaName: event
+            tableName: compilation_events
+            indexName: idx_compilation_events_event_id
+            columns:
+              - column:
+                  name: event_id
+
+        - createIndex:
+            schemaName: event
+            tableName: compilation_events
+            indexName: idx_compilation_events_compilation_id
+            columns:
+              - column:
+                  name: compilation_id

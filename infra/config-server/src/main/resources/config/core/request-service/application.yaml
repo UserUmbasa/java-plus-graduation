@@ -1,49 +1,55 @@
 spring:
   application:
     name: request-service
+
   sql:
     init:
-      mode: always
+      mode: never # Не использовать schema.sql/data.sql
+
+  liquibase:
+    enabled: true # Включить Liquibase
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://${REQUEST_DB_HOST:localhost}:${REQUEST_DB_PORT:6437}/${REQUEST_DB_NAME:request-service}
     username: ${REQUEST_DB_USER:test}
     password: ${REQUEST_DB_PASSWORD:test}
+
   jpa:
     hibernate:
-      ddl-auto: create-drop #none
+      ddl-auto: validate # Только проверять соответствие Entity и БД
+
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
     properties:
       hibernate:
-        default_schema: request
-        format_sql: true
+        default_schema: request # Hibernate работает со схемой request
+        format_sql: true         # Красивый вывод SQL
 
-    show-sql: true  # Добавляем здесь
-    logging: # Добавляем секцию логирования
-      level:
-        org:
-          hibernate:
-            SQL: DEBUG
-            type:
-              descriptor:
-                sql:
-                  BasicBinder: TRACE
+    show-sql: true # Показывать SQL в логах
 
-  # Настройки Eureka клиента
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# ---------- Eureka ----------
 eureka:
   instance:
-    # Использовать IP вместо имени хоста (решает проблему с DNS)
     prefer-ip-address: true
-    # Явно задаем формат ID, чтобы там был IP, а не имя хоста
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.value}
 
+# ---------- gRPC ----------
 grpc:
   client:
     collector:
-      address: "discovery:///collector"
+      address: discovery:///collector
       enableKeepAlive: true
       keepAliveWithoutCalls: true
       negotiationType: PLAINTEXT
 
+# ---------- HTTP ----------
 server:
-    port: 0
+  port: 8080
+# port: 0 # Для локального запуска нескольких экземпляров из IDE
